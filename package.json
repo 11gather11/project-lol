@@ -1,0 +1,11 @@
+{
+  "name": "project-lol",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun run --filter '*' dev"
+  }
+}
