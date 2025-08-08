@@ -9,6 +9,8 @@
 		"start": "node .output/server/index.mjs"
 	},
 	"dependencies": {
+		"@project-lol/server": "workspace:^",
+		"@project-lol/discord": "workspace:^",
 		"@tanstack/react-router": "^1.130.12",
 		"@tanstack/react-router-devtools": "^1.130.13",
 		"@tanstack/react-start": "^1.130.16",

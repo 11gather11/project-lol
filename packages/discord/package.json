@@ -3,6 +3,9 @@
 	"scripts": {
 		"dev": "bun run --hot src/index.ts"
 	},
+	"exports": {
+		".": "./src/index.js"
+	},
 	"dependencies": {
 		"hono": "^4.9.0"
 	},
