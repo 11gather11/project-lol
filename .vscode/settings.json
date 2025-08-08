@@ -1,0 +1,15 @@
+{
+	"editor.formatOnSave": true,
+	"npm.packageManager": "bun",
+	"npm.scriptRunner": "bun",
+	"files.watcherExclude": {
+		"**/routeTree.gen.ts": true
+	},
+	"search.exclude": {
+		"**/routeTree.gen.ts": true
+	},
+	"files.readonlyInclude": {
+		"**/routeTree.gen.ts": true
+	},
+	"cSpell.words": ["tanstack"]
+}
