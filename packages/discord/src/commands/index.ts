@@ -1,8 +1,5 @@
 import type { Command } from '@/types/client'
-import jankenCommand from './janken'
-
 export const commands: readonly Command[] = [
-	jankenCommand,
 	// 他のコマンドをここに追加
 ] as const
 

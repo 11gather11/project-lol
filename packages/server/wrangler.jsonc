@@ -2,7 +2,16 @@
 	"$schema": "../../node_modules/wrangler/config-schema.json",
 	"name": "server",
 	"main": "src/index.ts",
-	"compatibility_date": "2025-08-07"
+	"compatibility_date": "2025-08-07",
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "project-lol",
+			"database_id": "ad067efd-14f0-42ef-995d-f05c27781ec6",
+			"migrations_dir": "drizzle"
+		}
+	]
+
 	// "compatibility_flags": [
 	//   "nodejs_compat"
 	// ],
