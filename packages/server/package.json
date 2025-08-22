@@ -13,11 +13,11 @@
 		".": "./src/index.js"
 	},
 	"dependencies": {
-		"drizzle-orm": "^0.44.4",
-		"hono": "^4.9.1"
+		"drizzle-orm": "0.44.4",
+		"hono": "4.9.4"
 	},
 	"devDependencies": {
-		"drizzle-kit": "^0.31.4",
-		"wrangler": "^4.29.1"
+		"drizzle-kit": "0.31.4",
+		"wrangler": "4.32.0"
 	}
 }

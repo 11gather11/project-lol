@@ -10,9 +10,7 @@
 		"biome:check": "biome check --write"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.1.4"
-	},
-	"dependencies": {
-		"lefthook": "^1.12.2"
+		"@biomejs/biome": "2.2.0",
+		"lefthook": "1.12.3"
 	}
 }
