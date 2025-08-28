@@ -1,6 +1,6 @@
 {
 	"$schema": "../../node_modules/wrangler/config-schema.json",
-	"name": "server",
+	"name": "project-lol-server",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-08-07",
 	"d1_databases": [
@@ -9,6 +9,13 @@
 			"database_name": "project-lol",
 			"database_id": "ad067efd-14f0-42ef-995d-f05c27781ec6",
 			"migrations_dir": "drizzle"
+		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "PROJECT_LOL",
+			"id": "ab2b267dc87440dd891e054f12bc7350",
+			"preview_id": "b3c3ff08be86469cb77e026bebe1e8b8"
 		}
 	]
 
