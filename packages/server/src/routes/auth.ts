@@ -2,6 +2,7 @@ import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { userZodSchema } from '../db/schema'
+import { apiKeyMiddleware } from '../middlewares/apiKeyMiddleware'
 
 const RiotAuthSchema = userZodSchema.pick({
 	discordId: true,
@@ -9,21 +10,8 @@ const RiotAuthSchema = userZodSchema.pick({
 
 export const authRouter = new Hono<{ Bindings: Cloudflare.Env }>()
 	.use('*', cors({ origin: '*' }))
+	.use(apiKeyMiddleware)
 	.post('/riot', zValidator('json', RiotAuthSchema), async (c) => {
-		const auth = c.req.header('Authorization')
-		if (!auth || !auth.startsWith('Bearer ')) {
-			return c.json({ error: 'No or invalid API Key header' }, 401)
-		}
-
-		// Get environment variables
-		const API_KEY = c.env.API_KEY
-
-		// Validate API Key
-		const token = auth.split(' ')[1]
-		if (token !== API_KEY) {
-			return c.json({ error: 'Invalid API Key' }, 403)
-		}
-
 		const { discordId } = c.req.valid('json')
 
 		const state = crypto.randomUUID()
