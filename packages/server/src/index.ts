@@ -2,7 +2,11 @@ import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import { authRouter } from './routes/auth'
 
-const app = new Hono().route('/auth', authRouter)
+const app = new Hono()
+	.get('/riot.txt', (c) => {
+		return c.text('aec8562c-beed-49cb-a65f-95fb818ef2c2')
+	})
+	.route('/auth', authRouter)
 
 app.onError((err, c) => {
 	if (err instanceof HTTPException) {
