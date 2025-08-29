@@ -1,11 +1,11 @@
 {
 	"version": "6",
 	"dialect": "sqlite",
-	"id": "abaa181f-6bc9-4832-940c-b5f2a5c25e19",
+	"id": "a80a0a78-1813-4255-806c-cc0128df2b33",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"tables": {
-		"riot_accounts": {
-			"name": "riot_accounts",
+		"lol_ranks": {
+			"name": "lol_ranks",
 			"columns": {
 				"id": {
 					"name": "id",
@@ -14,22 +14,99 @@
 					"notNull": true,
 					"autoincrement": false
 				},
-				"userId": {
-					"name": "userId",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": true,
-					"autoincrement": false
-				},
 				"puuid": {
 					"name": "puuid",
 					"type": "text",
 					"primaryKey": false,
+					"notNull": false,
+					"autoincrement": false
+				},
+				"queue_type": {
+					"name": "queue_type",
+					"type": "text",
+					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false
 				},
-				"gameName": {
-					"name": "gameName",
+				"tier": {
+					"name": "tier",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"rank": {
+					"name": "rank",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"leaguePoints": {
+					"name": "leaguePoints",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"wins": {
+					"name": "wins",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"losses": {
+					"name": "losses",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"last_updated": {
+					"name": "last_updated",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false,
+					"default": "(current_timestamp)"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"lol_ranks_puuid_riot_accounts_puuid_fk": {
+					"name": "lol_ranks_puuid_riot_accounts_puuid_fk",
+					"tableFrom": "lol_ranks",
+					"tableTo": "riot_accounts",
+					"columnsFrom": ["puuid"],
+					"columnsTo": ["puuid"],
+					"onDelete": "cascade",
+					"onUpdate": "cascade"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {}
+		},
+		"riot_accounts": {
+			"name": "riot_accounts",
+			"columns": {
+				"puuid": {
+					"name": "puuid",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"discord_id": {
+					"name": "discord_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"name": {
+					"name": "name",
 					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
@@ -48,77 +125,22 @@
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false
-				},
-				"soloRank": {
-					"name": "soloRank",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": false,
-					"autoincrement": false
-				},
-				"soloTier": {
-					"name": "soloTier",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": false,
-					"autoincrement": false
-				},
-				"soloLP": {
-					"name": "soloLP",
-					"type": "integer",
-					"primaryKey": false,
-					"notNull": false,
-					"autoincrement": false
-				},
-				"flexRank": {
-					"name": "flexRank",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": false,
-					"autoincrement": false
-				},
-				"flexTier": {
-					"name": "flexTier",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": false,
-					"autoincrement": false
-				},
-				"flexLP": {
-					"name": "flexLP",
-					"type": "integer",
-					"primaryKey": false,
-					"notNull": false,
-					"autoincrement": false
-				},
-				"lastUpdated": {
-					"name": "lastUpdated",
-					"type": "integer",
-					"primaryKey": false,
-					"notNull": true,
-					"autoincrement": false,
-					"default": "(unixepoch())"
 				}
 			},
 			"indexes": {
-				"riot_accounts_userId_unique": {
-					"name": "riot_accounts_userId_unique",
-					"columns": ["userId"],
-					"isUnique": true
-				},
-				"riot_accounts_puuid_unique": {
-					"name": "riot_accounts_puuid_unique",
-					"columns": ["puuid"],
+				"riot_accounts_discord_id_unique": {
+					"name": "riot_accounts_discord_id_unique",
+					"columns": ["discord_id"],
 					"isUnique": true
 				}
 			},
 			"foreignKeys": {
-				"riot_accounts_userId_users_id_fk": {
-					"name": "riot_accounts_userId_users_id_fk",
+				"riot_accounts_discord_id_users_discord_id_fk": {
+					"name": "riot_accounts_discord_id_users_discord_id_fk",
 					"tableFrom": "riot_accounts",
 					"tableTo": "users",
-					"columnsFrom": ["userId"],
-					"columnsTo": ["id"],
+					"columnsFrom": ["discord_id"],
+					"columnsTo": ["discord_id"],
 					"onDelete": "cascade",
 					"onUpdate": "cascade"
 				}
@@ -130,42 +152,28 @@
 		"users": {
 			"name": "users",
 			"columns": {
-				"id": {
-					"name": "id",
+				"discord_id": {
+					"name": "discord_id",
 					"type": "text",
 					"primaryKey": true,
 					"notNull": true,
 					"autoincrement": false
 				},
-				"discord_id": {
-					"name": "discord_id",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": true,
-					"autoincrement": false
-				},
-				"username": {
-					"name": "username",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": true,
-					"autoincrement": false
-				},
 				"created_at": {
 					"name": "created_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
-					"notNull": false,
+					"notNull": true,
 					"autoincrement": false,
-					"default": "(unixepoch())"
+					"default": "(current_timestamp)"
 				},
 				"updated_at": {
 					"name": "updated_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
-					"notNull": false,
+					"notNull": true,
 					"autoincrement": false,
-					"default": "(unixepoch())"
+					"default": "(current_timestamp)"
 				}
 			},
 			"indexes": {},
