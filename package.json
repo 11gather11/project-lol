@@ -2,23 +2,25 @@
 	"name": "project-lol",
 	"private": true,
 	"scripts": {
-		"build": "turbo run build",
 		"dev": "turbo run dev",
 		"biome:check": "biome check --write",
-		"check-types": "turbo run type-check"
+		"check-types": "turbo run type-check",
+		"build": "turbo run build"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.2",
 		"lefthook": "1.12.3",
 		"turbo": "^2.5.6",
-		"typescript": "^5.9.2"
+		"typescript": "5.9.2"
 	},
 	"engines": {
 		"node": ">=18"
 	},
 	"packageManager": "bun@1.2.21",
-	"workspaces": [
-		"apps/*",
-		"packages/*"
-	]
+	"workspaces": {
+		"packages": [
+			"apps/*",
+			"packages/*"
+		]
+	}
 }

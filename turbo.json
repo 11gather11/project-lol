@@ -1,5 +1,10 @@
 {
 	"$schema": "https://turbo.build/schema.json",
 	"ui": "tui",
-	"tasks": {}
+	"tasks": {
+		"dev": {
+			"cache": false,
+			"persistent": true
+		}
+	}
 }
