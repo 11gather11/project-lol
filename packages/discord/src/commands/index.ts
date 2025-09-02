@@ -1,7 +1,7 @@
 import type { Command } from '@/types/client'
-export const commands: readonly Command[] = [
-	// 他のコマンドをここに追加
-] as const
+import ping from './ping'
+
+export const commands: readonly Command[] = [ping] as const
 
 // コマンド名でのマップも提供（高速検索用）
 export const commandMap = new Map(

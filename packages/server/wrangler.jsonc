@@ -3,6 +3,9 @@
 	"name": "project-lol-server",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-08-07",
+	"observability": {
+		"enabled": true
+	},
 	"d1_databases": [
 		{
 			"binding": "DB",

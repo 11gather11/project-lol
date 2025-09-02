@@ -3,8 +3,8 @@ import { HTTPException } from 'hono/http-exception'
 import { authRouter } from './routes/auth'
 
 const app = new Hono()
-	.get('/riot.txt', (c) => {
-		return c.text('aec8562c-beed-49cb-a65f-95fb818ef2c2')
+	.get('/', (c) => {
+		return c.text('Project LoL Server is running!')
 	})
 	.route('/auth', authRouter)
 
@@ -29,7 +29,7 @@ app.notFound((c) => {
 	return c.json({ error: 'Not Found' }, 404)
 })
 
-export type AuthRouter = typeof authRouter
+export type AppType = typeof app
 
 export default {
 	port: 3001,

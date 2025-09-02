@@ -1,5 +1,6 @@
 import { Client, Collection, GatewayIntentBits } from 'discord.js'
 import { deployCommands } from '@/loaders/commands'
+import { deployEvents } from '@/loaders/events'
 import type { Command } from '@/types/client'
 import { env } from './schema/env'
 
@@ -17,5 +18,7 @@ client.commands = new Collection<string, Command>()
 client.cooldowns = new Collection<string, number>()
 
 deployCommands(client)
+
+deployEvents(client)
 
 client.login(env.DISCORD_TOKEN)
