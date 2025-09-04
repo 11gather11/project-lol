@@ -13,9 +13,17 @@ node_modules
 # Turbo
 .turbo
 
+# Wrangler
 .wrangler
 
+# TanStack
 .tanstack
+
+# Build outputs
+build
+dist
+.output
+.nitro
 
 # Misc
 .DS_Store

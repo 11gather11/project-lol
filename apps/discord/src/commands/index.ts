@@ -1,5 +1,5 @@
 import type { Command } from '@/types/client'
-import ping from './ping'
+import ping from './ping.ts'
 
 export const commands: readonly Command[] = [ping] as const
 

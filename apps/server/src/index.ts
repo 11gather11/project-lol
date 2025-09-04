@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
-import { authRouter } from './routes/auth'
+import { authRouter } from '@/routes/auth'
 
 const app = new Hono()
 	.get('/', (c) => {

@@ -2,7 +2,7 @@ import { Client, Collection, GatewayIntentBits } from 'discord.js'
 import { deployCommands } from '@/loaders/commands'
 import { deployEvents } from '@/loaders/events'
 import type { Command } from '@/types/client'
-import { env } from './schema/env'
+import { env } from './schema/env.ts'
 
 // 新しいClientインスタンスを作成
 const client = new Client({
