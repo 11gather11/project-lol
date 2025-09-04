@@ -5,15 +5,15 @@
 	"sideEffects": false,
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
 		"build": "vite build",
+		"deploy": "npm run build && wrangler deploy --minify",
+		"dev": "vite dev",
 		"start": "node .output/server/index.mjs",
-		"typecheck": "tsc --noEmit",
-		"deploy": "npm run build && wrangler deploy --minify"
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@project-lol/server": "workspace:*",
 		"@project-lol/discord": "workspace:*",
+		"@project-lol/server": "workspace:*",
 		"@tanstack/react-router": "1.131.34",
 		"@tanstack/react-router-devtools": "1.131.34",
 		"@tanstack/react-start": "1.131.34",

@@ -1,19 +1,19 @@
 {
 	"name": "@project-lol/server",
 	"version": "0.1.0",
-	"type": "module",
 	"private": true,
-	"scripts": {
-		"dev": "wrangler dev",
-		"deploy": "wrangler deploy --minify",
-		"cf-typegen": "wrangler types --env-interface CloudflareBindings",
-		"typecheck": "tsc --noEmit",
-		"generate": "drizzle-kit generate",
-		"local:migration": "wrangler d1 migrations apply project-lol --local",
-		"remote:migration": "wrangler d1 migrations apply project-lol --remote"
-	},
+	"type": "module",
 	"exports": {
 		".": "./src/index.js"
+	},
+	"scripts": {
+		"cf-typegen": "wrangler types --env-interface CloudflareBindings",
+		"deploy": "wrangler deploy --minify",
+		"dev": "wrangler dev",
+		"generate": "drizzle-kit generate",
+		"local:migration": "wrangler d1 migrations apply project-lol --local",
+		"remote:migration": "wrangler d1 migrations apply project-lol --remote",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@hono/swagger-ui": "0.5.2",
