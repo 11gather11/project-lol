@@ -7,6 +7,7 @@
 		".": "./src/index.js"
 	},
 	"scripts": {
+		"biome:check": "biome check --write",
 		"cf-typegen": "wrangler types --env-interface CloudflareBindings",
 		"deploy": "wrangler deploy --minify",
 		"dev": "wrangler dev",
@@ -24,6 +25,7 @@
 		"zod": "catalog:"
 	},
 	"devDependencies": {
+		"@biomejs/biome": "catalog:",
 		"drizzle-kit": "0.31.4",
 		"typescript": "catalog:",
 		"wrangler": "catalog:"

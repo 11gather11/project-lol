@@ -12,6 +12,9 @@
 		"build": {
 			"dependsOn": ["^build"],
 			"outputs": ["dist/**"]
+		},
+		"biome:check": {
+			"dependsOn": ["^biome:check"]
 		}
 	}
 }
