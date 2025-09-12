@@ -5,16 +5,15 @@ import {
 	type ChatInputCommandInteraction,
 	EmbedBuilder,
 	Events,
-	type Interaction,
 	type ModalSubmitInteraction,
 } from 'discord.js'
-import { config } from '@/config/config'
+import { colors } from '@/config/colors'
 import { logger } from '@/logger'
-import type { BotEvent } from '@/types/client'
+import type { Event } from '@/types/event'
 
-const event: BotEvent = {
+export default {
 	name: Events.InteractionCreate,
-	execute(interaction: Interaction) {
+	execute(interaction) {
 		// 受け取ったインタラクションの種類に応じてハンドラを呼び出す
 		if (interaction.isChatInputCommand()) {
 			handleChatInputCommand(interaction)
@@ -26,7 +25,7 @@ const event: BotEvent = {
 			handleModalSubmit(interaction)
 		}
 	},
-}
+} satisfies Event<Events.InteractionCreate>
 
 // ChatInputCommand（スラッシュコマンド）の処理
 const handleChatInputCommand = (
@@ -49,7 +48,7 @@ const handleChatInputCommand = (
 				.setDescription(
 					`あと${Math.floor((cooldown - Date.now()) / 1000)}秒待ってからこのコマンドを再度使用できます。`
 				)
-				.setColor(config.colors.warn)
+				.setColor(colors.warn)
 			interaction.reply({
 				embeds: [embed],
 				ephemeral: true,
@@ -132,5 +131,3 @@ const handleButton = (interaction: ButtonInteraction<CacheType>) => {
 		logger.error(error)
 	}
 }
-
-export default event
