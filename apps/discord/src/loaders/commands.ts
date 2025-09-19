@@ -82,10 +82,7 @@ export const loadCommands = async (client: Client): Promise<void> => {
 	const dir = `${import.meta.dir}/../commands`
 
 	// 並列読み込みのためにまず全ファイルパスを収集
-	const commandFiles: string[] = []
-	for await (const file of glob.scan(dir)) {
-		commandFiles.push(file)
-	}
+	const commandFiles = await Array.fromAsync(glob.scan(dir))
 
 	// コマンドを並列で読み込み
 	const loadCommandPromises = commandFiles.map(async (file) => {
@@ -116,11 +113,7 @@ export const loadCommands = async (client: Client): Promise<void> => {
 	const results = await Promise.allSettled(loadCommandPromises)
 
 	// 全インポート完了後にコマンドを登録
-	let loadedCount = 0
-	let failedCount = 0
-	const duplicateCommands = new Set<string>()
-
-	for (const result of results) {
+	const processedResults = results.map((result) => {
 		if (result.status === 'fulfilled' && result.value.success) {
 			const { file, command } = result.value
 
@@ -133,37 +126,57 @@ export const loadCommands = async (client: Client): Promise<void> => {
 					hasValidDescription:
 						typeof command?.command?.description === 'string',
 				})
-				failedCount++
-				continue
+				return { success: false, file, command: null, isDuplicate: false }
 			}
 
-			// 重複コマンド名をチェック
 			const commandName = command.command.name
-			if (client.commands.has(commandName)) {
+			const isDuplicate = client.commands.has(commandName)
+
+			if (isDuplicate) {
 				logger.error(
 					`重複コマンド名 "${commandName}" が ${file} で見つかりました`
 				)
-				duplicateCommands.add(commandName)
-				failedCount++
-				continue
+				return { success: false, file, command, isDuplicate: true, commandName }
 			}
 
-			client.commands.set(commandName, command)
-			logger.debug(`コマンドを読み込み: ${commandName}`)
-			loadedCount++
+			// 非破壊的な登録チェック
+			return { success: true, file, command, commandName, isDuplicate: false }
 		} else {
-			failedCount++
+			return {
+				success: false,
+				file: 'unknown',
+				command: null,
+				isDuplicate: false,
+			}
 		}
-	}
+	})
+
+	// 成功したコマンドのみを登録（副作用を分離）
+	processedResults
+		.filter((result) => result.success)
+		.forEach((result) => {
+			if (result.command && result.commandName) {
+				client.commands.set(result.commandName, result.command)
+				logger.debug(`コマンドを読み込み: ${result.commandName}`)
+			}
+		})
+
+	// カウントを計算
+	const loadedCount = processedResults.filter((result) => result.success).length
+	const failedCount = processedResults.length - loadedCount
+	const duplicateCommands = processedResults
+		.filter((result) => result.isDuplicate)
+		.map((result) => result.commandName)
+		.filter((name): name is string => name !== undefined)
 
 	// 詳細情報とともにサマリーをログ出力
 	logger.info(
 		`コマンド読み込み完了: ${loadedCount}個読み込み、${failedCount}個失敗`
 	)
 
-	if (duplicateCommands.size > 0) {
+	if (duplicateCommands.length > 0) {
 		logger.warn(
-			`重複コマンド名が見つかりました: ${Array.from(duplicateCommands).join(', ')}`
+			`重複コマンド名が見つかりました: ${duplicateCommands.join(', ')}`
 		)
 	}
 

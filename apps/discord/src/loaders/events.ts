@@ -42,10 +42,7 @@ export const loadEvents = async (client: Client): Promise<void> => {
 	const dir = `${import.meta.dir}/../events`
 
 	// 並列読み込みのためにまず全ファイルパスを収集
-	const eventFiles: string[] = []
-	for await (const file of glob.scan(dir)) {
-		eventFiles.push(file)
-	}
+	const eventFiles = await Array.fromAsync(glob.scan(dir))
 
 	// イベントを並列で読み込み
 	const loadEventPromises = eventFiles.map(async (file) => {
@@ -76,10 +73,7 @@ export const loadEvents = async (client: Client): Promise<void> => {
 	const results = await Promise.allSettled(loadEventPromises)
 
 	// 全インポート完了後にイベントを登録
-	let loadedCount = 0
-	let failedCount = 0
-
-	for (const result of results) {
+	const processedResults = results.map((result) => {
 		if (result.status === 'fulfilled' && result.value.success) {
 			const { file, event } = result.value
 
@@ -89,8 +83,7 @@ export const loadEvents = async (client: Client): Promise<void> => {
 					hasOnce: typeof event?.once === 'boolean',
 					hasExecute: typeof event?.execute === 'function',
 				})
-				failedCount++
-				continue
+				return { success: false, file, event: null }
 			}
 
 			if (event.once) {
@@ -112,11 +105,15 @@ export const loadEvents = async (client: Client): Promise<void> => {
 			}
 
 			logger.debug(`イベントを読み込み: ${event.name}`)
-			loadedCount++
+			return { success: true, file, event }
 		} else {
-			failedCount++
+			return { success: false, file: 'unknown', event: null }
 		}
-	}
+	})
+
+	// カウントを計算
+	const loadedCount = processedResults.filter((result) => result.success).length
+	const failedCount = processedResults.length - loadedCount
 
 	logger.info(
 		`イベント読み込み完了: ${loadedCount}個読み込み、${failedCount}個失敗`
