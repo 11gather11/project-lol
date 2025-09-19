@@ -4,26 +4,26 @@ import { logger } from '@/logger'
 import type { Event } from '@/types/event'
 
 /**
- * Validates if an object conforms to the Event interface.
- * Checks required fields and Discord.js event name validity.
+ * オブジェクトがEvent interfaceに準拠しているかを検証します。
+ * 必須フィールドとDiscord.jsイベント名の有効性をチェックします。
  *
- * @param event - Object to validate as an Event
- * @returns True if valid Event, false otherwise
+ * @param event - Eventとして検証するオブジェクト
+ * @returns 有効なEventの場合true、そうでなければfalse
  */
 const isValidEvent = (event: unknown): event is Event => {
 	if (!event || typeof event !== 'object') return false
 
 	const evt = event as Record<string, unknown>
 
-	// Required fields
+	// 必須フィールド
 	if (!evt.name || typeof evt.name !== 'string') return false
 	if (typeof evt.once !== 'boolean') return false
 	if (!evt.execute || typeof evt.execute !== 'function') return false
 
-	// Validate event name is a valid Discord.js event
+	// イベント名が有効なDiscord.jsイベントかを検証
 	const validEvents = Object.values(Events) as string[]
 	if (!validEvents.includes(evt.name)) {
-		logger.warn(`Unknown Discord.js event: ${evt.name}`)
+		logger.warn(`未知のDiscord.jsイベント: ${evt.name}`)
 		return false
 	}
 
@@ -31,41 +31,43 @@ const isValidEvent = (event: unknown): event is Event => {
 }
 
 /**
- * Loads Discord.js events from the events directory in parallel.
- * Validates events and registers them to the Discord.js client.
+ * eventsディレクトリからDiscord.jsイベントを並列で読み込みます。
+ * イベントを検証してDiscord.jsクライアントに登録します。
  *
- * @param client - Discord.js Client instance to register events to
- * @returns Promise that resolves when all events are processed
+ * @param client - イベントを登録するDiscord.js Clientインスタンス
+ * @returns 全イベントの処理が完了したときに解決するPromise
  */
 export const loadEvents = async (client: Client): Promise<void> => {
 	const glob = new Glob('*/index.{js,ts}')
 	const dir = `${import.meta.dir}/../events`
 
-	// Collect all file paths first for parallel loading
+	// 並列読み込みのためにまず全ファイルパスを収集
 	const eventFiles: string[] = []
 	for await (const file of glob.scan(dir)) {
 		eventFiles.push(file)
 	}
 
-	// Load events in parallel
+	// イベントを並列で読み込み
 	const loadEventPromises = eventFiles.map(async (file) => {
 		try {
 			const eventModule = await import(`${dir}/${file}`)
 			const event = eventModule.default
 
 			if (!event) {
-				logger.error(`Event file ${file} does not export a default event`)
+				logger.error(
+					`イベントファイル ${file} がデフォルトイベントをエクスポートしていません`
+				)
 				return { file, event: null, success: false }
 			}
 
 			return { file, event, success: true }
 		} catch (error) {
 			if (error instanceof SyntaxError) {
-				logger.error(`Syntax error in event file ${file}: ${error.message}`)
+				logger.error(`イベントファイル ${file} で構文エラー: ${error.message}`)
 			} else if (error instanceof TypeError) {
-				logger.error(`Type error loading event ${file}: ${error.message}`)
+				logger.error(`イベント ${file} 読み込み時に型エラー: ${error.message}`)
 			} else {
-				logger.error(`Failed to load event ${file}:`, error)
+				logger.error(`イベント ${file} の読み込みに失敗:`, error)
 			}
 			return { file, event: null, success: false, error }
 		}
@@ -73,7 +75,7 @@ export const loadEvents = async (client: Client): Promise<void> => {
 
 	const results = await Promise.allSettled(loadEventPromises)
 
-	// Register events after all imports complete
+	// 全インポート完了後にイベントを登録
 	let loadedCount = 0
 	let failedCount = 0
 
@@ -82,7 +84,7 @@ export const loadEvents = async (client: Client): Promise<void> => {
 			const { file, event } = result.value
 
 			if (!isValidEvent(event)) {
-				logger.error(`Invalid event structure in ${file}:`, {
+				logger.error(`無効なイベント構造 ${file}:`, {
 					hasName: !!event?.name,
 					hasOnce: typeof event?.once === 'boolean',
 					hasExecute: typeof event?.execute === 'function',
@@ -96,7 +98,7 @@ export const loadEvents = async (client: Client): Promise<void> => {
 					try {
 						return event.execute(...parameters)
 					} catch (error) {
-						logger.error(`Error in event ${event.name}:`, error)
+						logger.error(`イベント ${event.name} でエラー:`, error)
 					}
 				})
 			} else {
@@ -104,12 +106,12 @@ export const loadEvents = async (client: Client): Promise<void> => {
 					try {
 						return event.execute(...parameters)
 					} catch (error) {
-						logger.error(`Error in event ${event.name}:`, error)
+						logger.error(`イベント ${event.name} でエラー:`, error)
 					}
 				})
 			}
 
-			logger.debug(`Loaded event: ${event.name}`)
+			logger.debug(`イベントを読み込み: ${event.name}`)
 			loadedCount++
 		} else {
 			failedCount++
@@ -117,6 +119,6 @@ export const loadEvents = async (client: Client): Promise<void> => {
 	}
 
 	logger.info(
-		`Event loading complete: ${loadedCount} loaded, ${failedCount} failed`
+		`イベント読み込み完了: ${loadedCount}個読み込み、${failedCount}個失敗`
 	)
 }

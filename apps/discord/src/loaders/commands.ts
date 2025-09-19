@@ -4,59 +4,59 @@ import { logger } from '@/logger'
 import type { Command } from '@/types/command'
 
 /**
- * Validates if an object conforms to the Command interface.
- * Checks required fields, Discord.js API compliance, and optional handlers.
+ * オブジェクトがCommand interfaceに準拠しているかを検証します。
+ * 必須フィールド、Discord.js API準拠、オプションハンドラーをチェックします。
  *
- * @param cmd - Object to validate as a Command
- * @returns True if valid Command, false otherwise
+ * @param cmd - Commandとして検証するオブジェクト
+ * @returns 有効なCommandの場合true、そうでなければfalse
  */
 const isValidCommand = (cmd: unknown): cmd is Command => {
 	if (!cmd || typeof cmd !== 'object') return false
 
 	const command = cmd as Record<string, unknown>
 
-	// Required fields validation
+	// 必須フィールドの検証
 	if (!command.command || typeof command.command !== 'object') return false
 	if (!command.execute || typeof command.execute !== 'function') return false
 
-	// Validate Discord.js command structure requirements
+	// Discord.jsコマンド構造の要件を検証
 	const commandData = command.command as Record<string, unknown>
 	if (!commandData.name || typeof commandData.name !== 'string') return false
 	if (!commandData.description || typeof commandData.description !== 'string')
 		return false
 
-	// Validate command name requirements (Discord.js restrictions)
+	// コマンド名の要件を検証（Discord.jsの制限）
 	const nameRegex = /^[\w-]{1,32}$/
 	if (!nameRegex.test(commandData.name as string)) {
 		logger.warn(
-			`Command name "${commandData.name}" must be 1-32 characters and contain only letters, numbers, - and _`
+			`コマンド名 "${commandData.name}" は1-32文字で、英数字、-、_のみ使用可能です`
 		)
 		return false
 	}
 
-	// Validate description length (Discord.js restriction)
+	// 説明文の長さを検証（Discord.jsの制限）
 	if ((commandData.description as string).length > 100) {
 		logger.warn(
-			`Command description for "${commandData.name}" exceeds 100 character limit`
+			`コマンド "${commandData.name}" の説明が100文字制限を超えています`
 		)
 		return false
 	}
 
-	// Optional fields validation
+	// オプションフィールドの検証
 	if (command.autocomplete && typeof command.autocomplete !== 'function')
 		return false
 	if (command.modal && typeof command.modal !== 'function') return false
 	if (command.button && typeof command.button !== 'function') return false
 	if (command.cooldown && typeof command.cooldown !== 'number') return false
 
-	// Validate cooldown range (reasonable limits)
+	// クールダウン範囲の検証（合理的な制限）
 	if (
 		command.cooldown &&
 		typeof command.cooldown === 'number' &&
 		(command.cooldown < 0 || command.cooldown > 86400)
 	) {
 		logger.warn(
-			`Command "${commandData.name}" cooldown must be between 0-86400 seconds`
+			`コマンド "${commandData.name}" のクールダウンは0-86400秒の範囲で設定してください`
 		)
 		return false
 	}
@@ -65,15 +65,15 @@ const isValidCommand = (cmd: unknown): cmd is Command => {
 }
 
 /**
- * Loads Discord.js slash commands from the commands directory in parallel.
- * Validates commands and registers them to client.commands Collection.
- * Runtime error handling is done in interactionCreate handler.
+ * commandsディレクトリからDiscord.jsスラッシュコマンドを並列で読み込みます。
+ * コマンドを検証してclient.commands Collectionに登録します。
+ * 実行時エラーハンドリングはinteractionCreateハンドラーで行われます。
  *
- * @param client - Discord.js Client instance to register commands to
- * @returns Promise that resolves when all commands are processed
+ * @param client - コマンドを登録するDiscord.js Clientインスタンス
+ * @returns 全コマンドの処理が完了したときに解決するPromise
  */
 export const loadCommands = async (client: Client): Promise<void> => {
-	// Initialize commands collection if it doesn't exist
+	// コマンドコレクションが存在しない場合は初期化
 	if (!client.commands) {
 		client.commands = new Collection<string, Command>()
 	}
@@ -81,31 +81,33 @@ export const loadCommands = async (client: Client): Promise<void> => {
 	const glob = new Glob('*/index.{js,ts}')
 	const dir = `${import.meta.dir}/../commands`
 
-	// Collect all file paths first for parallel loading
+	// 並列読み込みのためにまず全ファイルパスを収集
 	const commandFiles: string[] = []
 	for await (const file of glob.scan(dir)) {
 		commandFiles.push(file)
 	}
 
-	// Load commands in parallel
+	// コマンドを並列で読み込み
 	const loadCommandPromises = commandFiles.map(async (file) => {
 		try {
 			const commandModule = await import(`${dir}/${file}`)
 			const command = commandModule.default
 
 			if (!command) {
-				logger.error(`Command file ${file} does not export a default command`)
+				logger.error(
+					`コマンドファイル ${file} がデフォルトコマンドをエクスポートしていません`
+				)
 				return { file, command: null, success: false }
 			}
 
 			return { file, command, success: true }
 		} catch (error) {
 			if (error instanceof SyntaxError) {
-				logger.error(`Syntax error in command file ${file}: ${error.message}`)
+				logger.error(`コマンドファイル ${file} で構文エラー: ${error.message}`)
 			} else if (error instanceof TypeError) {
-				logger.error(`Type error loading command ${file}: ${error.message}`)
+				logger.error(`コマンド ${file} 読み込み時に型エラー: ${error.message}`)
 			} else {
-				logger.error(`Failed to load command ${file}:`, error)
+				logger.error(`コマンド ${file} の読み込みに失敗:`, error)
 			}
 			return { file, command: null, success: false, error }
 		}
@@ -113,7 +115,7 @@ export const loadCommands = async (client: Client): Promise<void> => {
 
 	const results = await Promise.allSettled(loadCommandPromises)
 
-	// Register commands after all imports complete
+	// 全インポート完了後にコマンドを登録
 	let loadedCount = 0
 	let failedCount = 0
 	const duplicateCommands = new Set<string>()
@@ -123,7 +125,7 @@ export const loadCommands = async (client: Client): Promise<void> => {
 			const { file, command } = result.value
 
 			if (!isValidCommand(command)) {
-				logger.error(`Invalid command structure in ${file}:`, {
+				logger.error(`無効なコマンド構造 ${file}:`, {
 					hasCommand: !!command?.command,
 					hasExecute: typeof command?.execute === 'function',
 					commandName: command?.command?.name || 'unknown',
@@ -135,37 +137,39 @@ export const loadCommands = async (client: Client): Promise<void> => {
 				continue
 			}
 
-			// Check for duplicate command names
+			// 重複コマンド名をチェック
 			const commandName = command.command.name
 			if (client.commands.has(commandName)) {
-				logger.error(`Duplicate command name "${commandName}" found in ${file}`)
+				logger.error(
+					`重複コマンド名 "${commandName}" が ${file} で見つかりました`
+				)
 				duplicateCommands.add(commandName)
 				failedCount++
 				continue
 			}
 
 			client.commands.set(commandName, command)
-			logger.debug(`Loaded command: ${commandName}`)
+			logger.debug(`コマンドを読み込み: ${commandName}`)
 			loadedCount++
 		} else {
 			failedCount++
 		}
 	}
 
-	// Log summary with detailed information
+	// 詳細情報とともにサマリーをログ出力
 	logger.info(
-		`Command loading complete: ${loadedCount} loaded, ${failedCount} failed`
+		`コマンド読み込み完了: ${loadedCount}個読み込み、${failedCount}個失敗`
 	)
 
 	if (duplicateCommands.size > 0) {
 		logger.warn(
-			`Found duplicate command names: ${Array.from(duplicateCommands).join(', ')}`
+			`重複コマンド名が見つかりました: ${Array.from(duplicateCommands).join(', ')}`
 		)
 	}
 
 	if (loadedCount === 0 && commandFiles.length > 0) {
 		logger.warn(
-			'No commands were successfully loaded. Check command file structure and exports.'
+			'コマンドが正常に読み込まれませんでした。コマンドファイルの構造とエクスポートを確認してください。'
 		)
 	}
 }
