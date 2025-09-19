@@ -25,7 +25,6 @@
 		"types": [
 			"bun-types" // add Bun global
 		],
-		"outDir": "./dist",
 
 		"baseUrl": "./",
 		"paths": {

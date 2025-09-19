@@ -9,12 +9,12 @@
 		"catalog": {
 			"@biomejs/biome": "2.2.4",
 			"typescript": "5.9.2",
-			"wrangler": "4.35.0",
-			"zod": "4.1.8"
+			"wrangler": "4.38.0",
+			"zod": "4.1.9"
 		},
 		"catalogs": {
 			"hono": {
-				"hono": "4.9.6"
+				"hono": "4.9.8"
 			}
 		}
 	},
@@ -26,11 +26,11 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
-		"lefthook": "1.13.0",
+		"lefthook": "1.13.1",
 		"turbo": "^2.5.6",
 		"typescript": "catalog:"
 	},
-	"packageManager": "bun@1.2.21",
+	"packageManager": "bun@1.2.22",
 	"engines": {
 		"node": ">=18"
 	}
