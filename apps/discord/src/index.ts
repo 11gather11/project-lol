@@ -2,7 +2,7 @@ import { Client, Collection } from 'discord.js'
 import { loadCommands } from '@/loaders/commands'
 import { loadEvents } from '@/loaders/events.ts'
 import type { Command, Cooldown } from '@/types/command'
-import { deployCommands } from '@/utils/deploy.ts'
+import { deployCommands } from '@/utils/deploy'
 import { env } from './schema/env.ts'
 
 // 新しいClientインスタンスを作成

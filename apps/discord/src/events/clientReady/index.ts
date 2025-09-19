@@ -1,4 +1,5 @@
 import { Events } from 'discord.js'
+import { logger } from '@/logger'
 import type { Event } from '@/types/event'
 
 export default {
@@ -6,6 +7,6 @@ export default {
 	once: true,
 
 	execute: async (client) => {
-		console.log(`Ready! Logged in as ${client.user?.tag}`)
+		logger.info(`ログインしました: ${client.user?.tag}`)
 	},
 } satisfies Event<Events.ClientReady>
