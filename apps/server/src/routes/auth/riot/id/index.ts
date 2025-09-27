@@ -14,7 +14,7 @@ export const idRouter = new Hono().post(
 	zValidator('json', idSchema),
 	async (c) => {
 		const { discordId, riotName, riotTag, region } = c.req.valid('json')
-console.log(discordId, riotName, riotTag, region)
+		console.log(discordId, riotName, riotTag, region)
 		if (!discordId || !riotName || !riotTag || !region) {
 			return c.json({ error: 'Missing required fields' }, 400)
 		}
