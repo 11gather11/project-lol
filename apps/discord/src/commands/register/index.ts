@@ -12,30 +12,59 @@ const apiClient = hc<AppType>(env.API_BASE_URL, {
 export default {
 	command: new SlashCommandBuilder()
 		.setName('register')
-		.setDescription('LoLのアカウントとDiscordアカウントを紐付けます')
+		.setDescription('ランクとDiscordアカウントを紐付けます')
+		.addStringOption((option) =>
+			option
+				.setName('tier')
+				.setDescription('ランクを登録します (例: ゴールド、シルバー、ブロンズ)')
+				.addChoices(
+					{ name: 'アイアン', value: 'IRON' },
+					{ name: 'ブロンズ', value: 'BRONZE' },
+					{ name: 'シルバー', value: 'SILVER' },
+					{ name: 'ゴールド', value: 'GOLD' },
+					{ name: 'プラチナ', value: 'PLATINUM' },
+					{ name: 'ダイヤモンド', value: 'DIAMOND' },
+					{ name: 'マスター', value: 'MASTER' },
+					{ name: 'グランドマスター', value: 'GRANDMASTER' },
+					{ name: 'チャレンジャー', value: 'CHALLENGER' }
+				)
+				.setRequired(true)
+		)
+		.addStringOption((option) =>
+			option
+				.setName('division')
+				.setDescription('ランクのディビジョンを登録します (例: I、II、III、IV)')
+				.addChoices(
+					{ name: 'I', value: 'I' },
+					{ name: 'II', value: 'II' },
+					{ name: 'III', value: 'III' },
+					{ name: 'IV', value: 'IV' }
+				)
+				.setRequired(true)
+		)
 		.toJSON(),
 
 	execute: async (interaction) => {
-		const res = await apiClient.auth.riot[':discordId'].$post({
+		const tier = interaction.options.getString('tier', true)
+		const division = interaction.options.getString('division', true)
+		const res = await apiClient.rank[':discordId'].$post({
 			param: { discordId: interaction.user.id },
+			query: { tier, division },
 		})
 
 		if (!res.ok) {
 			logger.error('APIリクエスト失敗:', res.status, res.statusText)
 			await interaction.reply({
-				content: '登録URLの取得に失敗しました。後でもう一度お試しください。',
+				content: '登録中にエラーが発生しました。後でもう一度お試しください。',
 				flags: MessageFlags.Ephemeral,
 			})
 			return
 		}
 
+		const data = await res.json()
 		await interaction.reply({
-			content: 'DMで詳細を送信しました。',
+			content: data.message,
 			flags: MessageFlags.Ephemeral,
 		})
-		const data = await res.json()
-		await interaction.user.send(
-			`以下のURLからRiotアカウントでログインしてください: ${data.authUrl}`
-		)
 	},
 } satisfies Command

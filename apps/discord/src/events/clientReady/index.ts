@@ -12,15 +12,18 @@ export default {
 	once: true,
 
 	execute: async (client) => {
-		logger.info(`ログインしました: ${client.user?.tag}`)
+		try {
+			logger.info(`ログインしました: ${client.user?.tag}`)
 
-		// APIサーバーに接続
-		const res = await apiClient.index.$get()
-		if (!res.ok) {
-			logger.error('APIサーバーへの接続に失敗しました:', res.statusText)
-			return
+			// APIサーバーに接続
+			const res = await apiClient.index.$get()
+			if (!res.ok) {
+				logger.error('APIサーバーへの接続に失敗しました:', res.statusText)
+			}
+
+			logger.info('APIサーバーに接続しました')
+		} catch (error) {
+			logger.error('クライアントの準備中にエラーが発生しました:', error)
 		}
-
-		logger.info('APIサーバーに接続しました')
 	},
 } satisfies Event<Events.ClientReady>

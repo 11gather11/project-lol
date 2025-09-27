@@ -11,6 +11,19 @@ export const users = sqliteTable('users', {
 		.$onUpdateFn(() => sql`(current_timestamp)`),
 })
 
+export const lolRank = sqliteTable('lol_rank', {
+	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+	discordId: text('discord_id')
+		.notNull()
+		.references(() => users.discordId, {
+			onDelete: 'cascade',
+			onUpdate: 'cascade',
+		})
+		.unique(),
+	tier: text('tier').notNull(),
+	division: text('division').notNull(),
+})
+
 export const riotAccounts = sqliteTable('riot_accounts', {
 	puuid: text('puuid').primaryKey(),
 	discordId: text('discord_id')
@@ -63,6 +76,9 @@ export const riotAccountsRelations = relations(
 
 export const usersRelations = relations(users, ({ one }) => ({
 	riotAccount: one(riotAccounts),
+	lolRanks: one(riotAccounts),
 }))
 
 export const userZodSchema = createInsertSchema(users)
+
+export const lolRankZodSchema = createInsertSchema(lolRank)

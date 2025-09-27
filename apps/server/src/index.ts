@@ -1,12 +1,14 @@
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import { authRouter } from '@/routes/auth'
+import { rankRouter } from '@/routes/rank'
 
 const app = new Hono()
 	.get('/', (c) => {
 		return c.text('Project LoL Server is running!')
 	})
 	.route('/auth', authRouter)
+	.route('/rank', rankRouter)
 
 app.onError((err, c) => {
 	if (err instanceof HTTPException) {
