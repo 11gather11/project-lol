@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { users, userZodSchema } from '@/db/schema'
 import { apiKeyMiddleware } from '@/middlewares/apiKeyMiddleware'
 import { corsMiddleware } from '@/middlewares/corsMiddleware'
+import { idRouter } from '@/routes/auth/riot/id'
 
 const RiotDiscordIdSchema = userZodSchema.pick({
 	discordId: true,
@@ -95,3 +96,4 @@ export const riotRouter = new Hono<{ Bindings: Cloudflare.Env }>()
 
 		return c.json({ message: 'Callback received', code, discordId })
 	})
+	.route('/id', idRouter)

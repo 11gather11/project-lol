@@ -12,6 +12,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@project-lol/server": "workspace:*",
 		"discord.js": "14.22.1",
 		"hono": "catalog:hono",
 		"winston": "3.17.0",

@@ -5,6 +5,8 @@ const envSchema = z.object({
 	DISCORD_CLIENT_ID: z.string(),
 	DISCORD_GUILD_ID: z.string(),
 	DISCORD_LOG_WEBHOOK_URL: z.url(),
+	API_BASE_URL: z.url(),
+	API_KEY: z.string(),
 })
 
 const parsedEnv = envSchema.safeParse(process.env)

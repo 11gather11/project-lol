@@ -30,5 +30,6 @@
 		"paths": {
 			"@/*": ["./src/*"]
 		}
-	}
+	},
+	"references": [{ "path": "../server/tsconfig.json" }]
 }
