@@ -12,7 +12,9 @@ export const users = sqliteTable('users', {
 })
 
 export const lolRank = sqliteTable('lol_rank', {
-	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
 	discordId: text('discord_id')
 		.notNull()
 		.references(() => users.discordId, {
