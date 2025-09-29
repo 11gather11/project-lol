@@ -7,7 +7,7 @@ import { env } from './schema/env.ts'
 
 // 新しいClientインスタンスを作成
 const client = new Client({
-	intents: [GatewayIntentBits.Guilds],
+	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
 })
 
 // コマンドを格納するコレクション

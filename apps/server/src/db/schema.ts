@@ -12,16 +12,12 @@ export const users = sqliteTable('users', {
 })
 
 export const lolRank = sqliteTable('lol_rank', {
-	id: text('id')
-		.primaryKey()
-		.$defaultFn(() => crypto.randomUUID()),
 	discordId: text('discord_id')
-		.notNull()
+		.primaryKey()
 		.references(() => users.discordId, {
 			onDelete: 'cascade',
 			onUpdate: 'cascade',
-		})
-		.unique(),
+		}),
 	tier: text('tier').notNull(),
 	division: text('division').notNull(),
 })

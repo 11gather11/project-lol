@@ -33,5 +33,5 @@
 	"files.readonlyInclude": {
 		"**/routeTree.gen.ts": true
 	},
-	"cSpell.words": ["cooldown", "cooldowns", "puuid", "tanstack"]
+	"cSpell.words": ["cooldown", "cooldowns", "puuid", "tanstack", "Unranked"]
 }
