@@ -15,7 +15,4 @@ export interface Command {
 		interaction: ModalSubmitInteraction<CacheType>
 	) => void | Promise<void>
 	button?: (interaction: ButtonInteraction) => void | Promise<void>
-	cooldown?: Cooldown
 }
-
-export type Cooldown = number
