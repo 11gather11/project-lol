@@ -24,6 +24,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
+		"@cloudflare/vite-plugin": "^1.13.7",
 		"@tailwindcss/vite": "4.1.13",
 		"@types/node": "24.5.2",
 		"@types/react": "19.1.15",
