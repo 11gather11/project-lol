@@ -20,7 +20,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
-		"@types/bun": "1.2.22",
+		"@types/bun": "1.2.23",
 		"typescript": "catalog:"
 	}
 }
