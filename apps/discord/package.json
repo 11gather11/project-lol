@@ -8,7 +8,8 @@
 	},
 	"scripts": {
 		"biome:check": "biome check --write",
-		"dev": "NODE_ENV=development bun run src/index.ts"
+		"dev": "NODE_ENV=development bun run src/index.ts",
+		"prod": "NODE_ENV=production bun run src/index.ts"
 	},
 	"dependencies": {
 		"@project-lol/server": "workspace:*",

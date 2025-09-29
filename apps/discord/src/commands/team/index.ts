@@ -38,7 +38,10 @@ interface TeamCombination {
 }
 
 // ディビジョンボーナスポイント
-const DIVISION_BONUS_POINTS = 5
+const DIVISION_BONUS_POINTS = 2.5
+
+// 戦力差のしきい値（この値以下の組み合わせのみを候補とする）
+const MAX_POWER_DIFFERENCE = 50
 
 const ERROR_MESSAGES = {
 	SERVER_ONLY: 'このコマンドはサーバー内でのみ使用できます。',
@@ -61,15 +64,15 @@ const calculateRankValue = (tier: string, division: string): number => {
 	const tierValues: Record<string, number> = {
 		UNRANKED: 0,
 		IRON: 10,
-		BRONZE: 20,
-		SILVER: 35,
+		BRONZE: 25,
+		SILVER: 40,
 		GOLD: 55,
-		PLATINUM: 80,
-		EMERALD: 110, // プラチナとダイヤモンドの間
-		DIAMOND: 145,
-		MASTER: 185, // ディビジョンなし
-		GRANDMASTER: 230, // ディビジョンなし
-		CHALLENGER: 280, // ディビジョンなし
+		PLATINUM: 70,
+		EMERALD: 85, // プラチナとダイヤモンドの間
+		DIAMOND: 100,
+		MASTER: 115, // ディビジョンなし
+		GRANDMASTER: 130, // ディビジョンなし
+		CHALLENGER: 150, // ディビジョンなし
 	}
 
 	const baseValue = tierValues[tier] || 0
@@ -135,7 +138,7 @@ const seededRandom = (seed: number): number => {
 	return x - Math.floor(x)
 }
 
-// メンバーデータから決定論的な結果のためのシードを生成
+// メンバーデータと現在時刻から非決定論的なシードを生成
 const generateSeed = (members: GuildMember[], rankData: RankInfo[]): number => {
 	const memberIds = members
 		.map((member) => member.id)
@@ -149,8 +152,11 @@ const generateSeed = (members: GuildMember[], rankData: RankInfo[]): number => {
 		.sort()
 		.join('')
 
+	// 現在時刻を追加して毎回異なる結果を生成
+	const timestamp = Date.now().toString()
+
 	let hash = 0
-	const combinedString = memberIds + rankString
+	const combinedString = memberIds + rankString + timestamp
 	for (let i = 0; i < combinedString.length; i++) {
 		const char = combinedString.charCodeAt(i)
 		hash = (hash << 5) - hash + char
@@ -238,12 +244,15 @@ function generateAllTeamCombinations(
 			blueTeam.totalRankPoints - redTeam.totalRankPoints
 		)
 
-		possibleCombinations.push({
-			blueTeam,
-			redTeam,
-			powerDifference,
-			combinationId: index + 1,
-		})
+		// しきい値以下の戦力差の組み合わせのみを追加
+		if (powerDifference <= MAX_POWER_DIFFERENCE) {
+			possibleCombinations.push({
+				blueTeam,
+				redTeam,
+				powerDifference,
+				combinationId: index + 1,
+			})
+		}
 	})
 
 	// 戦力差の小さい順にソート（最もバランスの良いものが最初）

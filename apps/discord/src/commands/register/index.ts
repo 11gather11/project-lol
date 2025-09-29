@@ -25,6 +25,7 @@ export default {
 					{ name: 'シルバー', value: 'SILVER' },
 					{ name: 'ゴールド', value: 'GOLD' },
 					{ name: 'プラチナ', value: 'PLATINUM' },
+					{ name: 'エメラルド', value: 'EMERALD' },
 					{ name: 'ダイヤモンド', value: 'DIAMOND' },
 					{ name: 'マスター', value: 'MASTER' },
 					{ name: 'グランドマスター', value: 'GRANDMASTER' },
