@@ -1,0 +1,81 @@
+name: Auto Tag
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/*/package.json'
+
+jobs:
+  create-tags:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Wait for CI completion
+        uses: fountainhead/action-wait-for-check@v1.1.0
+        id: wait-for-ci
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: quality-check
+          ref: ${{ github.sha }}
+          timeoutSeconds: 600
+
+      - name: Check CI status
+        if: steps.wait-for-ci.outputs.conclusion != 'success'
+        run: |
+          echo "CI failed or did not complete successfully"
+          echo "Conclusion: ${{ steps.wait-for-ci.outputs.conclusion }}"
+          exit 1
+
+      - name: Check version changes and create tags
+        run: |
+          # 変更されたpackage.jsonファイルを検出
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | grep 'apps/.*/package.json' || echo "")
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No package.json files changed"
+            exit 0
+          fi
+
+          for file in $CHANGED_FILES; do
+            echo "Processing $file"
+
+            # アプリ名を抽出 (apps/discord/package.json -> discord)
+            APP_NAME=$(echo $file | sed 's|apps/\([^/]*\)/package.json|\1|')
+
+            # 新しいバージョンを取得
+            NEW_VERSION=$(jq -r '.version' $file)
+
+            # 既存のタグをチェック
+            TAG_NAME="${APP_NAME}-v${NEW_VERSION}"
+
+            if git tag -l | grep -q "^${TAG_NAME}$"; then
+              echo "Tag $TAG_NAME already exists"
+              continue
+            fi
+
+            # 前のバージョンと比較
+            PREV_VERSION=$(git show HEAD~1:$file | jq -r '.version' 2>/dev/null || echo "0.0.0")
+
+            if [ "$NEW_VERSION" != "$PREV_VERSION" ]; then
+              echo "Version changed for $APP_NAME: $PREV_VERSION -> $NEW_VERSION"
+
+              # タグを作成
+              git tag -a "$TAG_NAME" -m "Release $APP_NAME version $NEW_VERSION"
+              git push origin "$TAG_NAME"
+
+              echo "Created and pushed tag: $TAG_NAME"
+            else
+              echo "No version change detected for $APP_NAME"
+            fi
+          done
