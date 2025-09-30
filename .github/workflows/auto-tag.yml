@@ -1,10 +1,11 @@
 name: Auto Tag
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
     branches: [main]
-    paths:
-      - 'apps/*/package.json'
 
 jobs:
   create-tags:
@@ -21,29 +22,23 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
-      - name: Wait for CI completion
-        uses: fountainhead/action-wait-for-check@v1.1.0
-        id: wait-for-ci
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: quality-check
-          ref: ${{ github.sha }}
-          timeoutSeconds: 600
-
       - name: Check CI status
-        if: steps.wait-for-ci.outputs.conclusion != 'success'
+        if: github.event.workflow_run.conclusion != 'success'
         run: |
-          echo "CI failed or did not complete successfully"
-          echo "Conclusion: ${{ steps.wait-for-ci.outputs.conclusion }}"
+          echo "CI workflow did not complete successfully"
+          echo "Conclusion: ${{ github.event.workflow_run.conclusion }}"
           exit 1
 
       - name: Check version changes and create tags
         run: |
-          # 変更されたpackage.jsonファイルを検出
-          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | grep 'apps/.*/package.json' || echo "")
+          # workflow_runの場合、トリガーとなったコミットを使用
+          TRIGGER_SHA=${{ github.event.workflow_run.head_sha }}
+
+          # package.jsonの変更があったかチェック
+          CHANGED_FILES=$(git diff --name-only ${TRIGGER_SHA}~1 ${TRIGGER_SHA} | grep 'apps/.*/package.json' || echo "")
 
           if [ -z "$CHANGED_FILES" ]; then
-            echo "No package.json files changed"
+            echo "No package.json files changed in triggering commit"
             exit 0
           fi
 
@@ -53,8 +48,8 @@ jobs:
             # アプリ名を抽出 (apps/discord/package.json -> discord)
             APP_NAME=$(echo $file | sed 's|apps/\([^/]*\)/package.json|\1|')
 
-            # 新しいバージョンを取得
-            NEW_VERSION=$(jq -r '.version' $file)
+            # 新しいバージョンを取得（トリガーSHAから）
+            NEW_VERSION=$(git show ${TRIGGER_SHA}:$file | jq -r '.version')
 
             # 既存のタグをチェック
             TAG_NAME="${APP_NAME}-v${NEW_VERSION}"
@@ -65,13 +60,13 @@ jobs:
             fi
 
             # 前のバージョンと比較
-            PREV_VERSION=$(git show HEAD~1:$file | jq -r '.version' 2>/dev/null || echo "0.0.0")
+            PREV_VERSION=$(git show ${TRIGGER_SHA}~1:$file | jq -r '.version' 2>/dev/null || echo "0.0.0")
 
             if [ "$NEW_VERSION" != "$PREV_VERSION" ]; then
               echo "Version changed for $APP_NAME: $PREV_VERSION -> $NEW_VERSION"
 
-              # タグを作成
-              git tag -a "$TAG_NAME" -m "Release $APP_NAME version $NEW_VERSION"
+              # タグを作成（トリガーSHAに対して）
+              git tag -a "$TAG_NAME" -m "Release $APP_NAME version $NEW_VERSION" ${TRIGGER_SHA}
               git push origin "$TAG_NAME"
 
               echo "Created and pushed tag: $TAG_NAME"
