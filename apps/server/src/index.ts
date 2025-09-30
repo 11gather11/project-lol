@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
-import version from '@/../../package.json'
 import { authRouter } from '@/routes/auth'
 import { rankRouter } from '@/routes/rank'
+import version from '../package.json'
 
 const app = new Hono()
 	.get('/', (c) => {

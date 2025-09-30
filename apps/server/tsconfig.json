@@ -1,9 +1,10 @@
 {
-	"include": ["src/**/*"],
+	"include": ["src/**/*", "package.json"],
 	"compilerOptions": {
 		"target": "ESNext",
 		"module": "ESNext",
 		"moduleResolution": "Bundler",
+		"resolveJsonModule": true,
 		"composite": true,
 		"outDir": "./dist",
 		"strict": true,
