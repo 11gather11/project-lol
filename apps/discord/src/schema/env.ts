@@ -9,15 +9,10 @@ const envSchema = z.object({
 	API_KEY: z.string(),
 })
 
-const parsedEnv = envSchema.safeParse(process.env)
-if (!parsedEnv.success) {
-	console.error(
-		'Invalid environment variables:',
-		z.treeifyError(parsedEnv.error)
-	)
-	throw new Error('Invalid environment variables')
+envSchema.parse(process.env)
+
+declare global {
+	namespace NodeJS {
+		interface ProcessEnv extends z.infer<typeof envSchema> {}
+	}
 }
-
-export const env = parsedEnv.data
-
-export type Env = z.infer<typeof envSchema>

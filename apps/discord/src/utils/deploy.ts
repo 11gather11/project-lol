@@ -1,6 +1,5 @@
 import { type Client, REST, Routes } from 'discord.js'
 import { logger } from '@/logger'
-import { env } from '@/schema/env'
 
 /**
  * コマンドデプロイメントの設定インターface
@@ -22,15 +21,15 @@ const getDeploymentConfig = (): DeploymentConfig => {
 	if (isProduction) {
 		return {
 			scope: 'global',
-			route: Routes.applicationCommands(env.DISCORD_CLIENT_ID),
+			route: Routes.applicationCommands(Bun.env.DISCORD_CLIENT_ID),
 		}
 	}
 
 	return {
 		scope: 'guild',
 		route: Routes.applicationGuildCommands(
-			env.DISCORD_CLIENT_ID,
-			env.DISCORD_GUILD_ID
+			Bun.env.DISCORD_CLIENT_ID,
+			Bun.env.DISCORD_GUILD_ID
 		),
 	}
 }
@@ -66,7 +65,7 @@ export const deployCommands = async (client: Client): Promise<void> => {
 
 	// REST APIクライアントの初期化とデプロイ
 	try {
-		const rest = new REST({ version: '10' }).setToken(env.DISCORD_TOKEN)
+		const rest = new REST({ version: '10' }).setToken(Bun.env.DISCORD_TOKEN)
 		await rest.put(config.route, { body: commands })
 
 		logger.success(

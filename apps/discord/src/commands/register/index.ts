@@ -1,14 +1,8 @@
-import type { AppType } from '@project-lol/server'
 import { EmbedBuilder, MessageFlags, SlashCommandBuilder } from 'discord.js'
-import { hc } from 'hono/client'
 import { colors, emoji } from '@/config'
 import { logger } from '@/logger'
-import { env } from '@/schema/env'
 import type { Command } from '@/types/command'
-
-const apiClient = hc<AppType>(env.API_BASE_URL, {
-	headers: { 'x-api-key': env.API_KEY },
-})
+import { apiClient } from '@/utils/apiClient'
 
 export default {
 	command: new SlashCommandBuilder()
@@ -45,8 +39,7 @@ export default {
 					{ name: 'なし', value: 'NONE' }
 				)
 				.setRequired(true)
-		)
-		.toJSON(),
+		),
 
 	execute: async (interaction) => {
 		try {
@@ -121,7 +114,7 @@ export default {
 						inline: true,
 					},
 					{
-						name: 'ㅤ',
+						name: String.fromCodePoint(8203),
 						value: '➤',
 						inline: true,
 					},

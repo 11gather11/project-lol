@@ -4,15 +4,24 @@ import type {
 	CacheType,
 	ChatInputCommandInteraction,
 	ModalSubmitInteraction,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
+	SlashCommandBuilder,
+	SlashCommandOptionsOnlyBuilder,
+	SlashCommandSubcommandsOnlyBuilder,
 } from 'discord.js'
 
 export interface Command {
-	command: RESTPostAPIChatInputApplicationCommandsJSONBody
-	execute: (interaction: ChatInputCommandInteraction) => void | Promise<void>
-	autocomplete?: (interaction: AutocompleteInteraction) => void | Promise<void>
+	command:
+		| SlashCommandBuilder
+		| SlashCommandSubcommandsOnlyBuilder
+		| SlashCommandOptionsOnlyBuilder
+	execute: (
+		interaction: ChatInputCommandInteraction<CacheType>
+	) => void | Promise<void>
+	autocomplete?: (
+		interaction: AutocompleteInteraction<CacheType>
+	) => void | Promise<void>
 	modal?: (
 		interaction: ModalSubmitInteraction<CacheType>
 	) => void | Promise<void>
-	button?: (interaction: ButtonInteraction) => void | Promise<void>
+	button?: (interaction: ButtonInteraction<CacheType>) => void | Promise<void>
 }

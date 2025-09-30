@@ -1,15 +1,13 @@
-import type { AppType } from '@project-lol/server'
 import {
 	EmbedBuilder,
 	GuildMember,
 	MessageFlags,
 	SlashCommandBuilder,
 } from 'discord.js'
-import { hc } from 'hono/client'
 import { colors, emoji } from '@/config'
 import { logger } from '@/logger'
-import { env } from '@/schema/env'
 import type { Command } from '@/types/command'
+import { apiClient } from '@/utils/apiClient'
 
 // 型定義
 interface RankInfo {
@@ -53,10 +51,6 @@ const ERROR_MESSAGES = {
 	NO_COMBINATIONS: 'チーム組み合わせを生成できませんでした。',
 	COMBINATION_SELECTION_ERROR: 'チーム組み合わせの選択でエラーが発生しました。',
 } as const
-
-const apiClient = hc<AppType>(env.API_BASE_URL, {
-	headers: { 'x-api-key': env.API_KEY },
-})
 
 // ユーティリティ関数
 const calculateRankValue = (tier: string, division: string): number => {
@@ -322,8 +316,7 @@ function createTeamEmbeds(
 export default {
 	command: new SlashCommandBuilder()
 		.setName('team')
-		.setDescription('ランクによる実力差を考慮したチーム分けを行います')
-		.toJSON(),
+		.setDescription('ランクによる実力差を考慮したチーム分けを行います'),
 
 	execute: async (interaction) => {
 		await interaction.deferReply()

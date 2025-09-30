@@ -4,6 +4,5 @@ import type { Command } from './command'
 declare module 'discord.js' {
 	interface Client {
 		commands: Collection<string, Command>
-		cooldowns: Collection<string, number>
 	}
 }
