@@ -4,13 +4,13 @@ import type { Event } from '@/types/event'
 import { updateActivity } from '@/utils/updateActivity'
 
 export default {
-	name: Events.ClientReady,
-	once: true,
+	name: Events.GuildCreate,
+	once: false,
 
-	execute: async (client) => {
-		logger.info(`${client.user.tag} でログインしました！`)
+	execute: async (guild) => {
+		logger.info(`新しいサーバーに参加: ${guild.name} (ID: ${guild.id})`)
 
 		// アクティビティを更新
-		updateActivity(client)
+		updateActivity(guild.client)
 	},
-} satisfies Event<Events.ClientReady>
+} satisfies Event<Events.GuildCreate>
