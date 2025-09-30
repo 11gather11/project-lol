@@ -30,5 +30,6 @@
 			"@/*": ["./src/*"]
 		}
 	},
-	"references": [{ "path": "../server/tsconfig.json" }]
+	"references": [{ "path": "../server/tsconfig.json" }],
+	"include": ["src/**/*"]
 }

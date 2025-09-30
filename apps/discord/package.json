@@ -11,7 +11,8 @@
 		"dev": "NODE_ENV=development bun --hot src/index.ts",
 		"start": "bun src/index.ts",
 		"dev:command": "NODE_ENV=development bun src/utils/deployCommands.ts",
-		"start:command": "bun src/utils/deployCommands.ts"
+		"start:command": "bun src/utils/deployCommands.ts",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@project-lol/server": "workspace:*",

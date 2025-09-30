@@ -1,3 +1,9 @@
 {
+	"files": [],
+	"references": [
+		{ "path": "./apps/discord" },
+		{ "path": "./apps/server" },
+		{ "path": "./apps/web" }
+	],
 	"exclude": ["node_modules"]
 }
