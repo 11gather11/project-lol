@@ -3,7 +3,7 @@ name: Deploy API Server
 on:
   push:
     tags:
-      - 'server-v*.*.*'
+      - 'server-v*'
 
 jobs:
   deploy-server:
