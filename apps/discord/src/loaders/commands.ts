@@ -1,5 +1,5 @@
 import { Glob } from 'bun'
-import { type Client, Collection } from 'discord.js'
+import { Collection } from 'discord.js'
 import { logger } from '@/logger'
 import type { Command } from '@/types/command'
 
@@ -72,12 +72,8 @@ const isValidCommand = (cmd: unknown): cmd is Command => {
  * @param client - コマンドを登録するDiscord.js Clientインスタンス
  * @returns 全コマンドの処理が完了したときに解決するPromise
  */
-export const loadCommands = async (client: Client): Promise<void> => {
-	// コマンドコレクションが存在しない場合は初期化
-	if (!client.commands) {
-		client.commands = new Collection<string, Command>()
-	}
-
+export const loadCommands = async (): Promise<Collection<string, Command>> => {
+	const collection = new Collection<string, Command>()
 	const glob = new Glob('*/index.{js,ts}')
 	const dir = `${import.meta.dir}/../commands`
 
@@ -130,7 +126,7 @@ export const loadCommands = async (client: Client): Promise<void> => {
 			}
 
 			const commandName = command.command.name
-			const isDuplicate = client.commands.has(commandName)
+			const isDuplicate = collection.has(commandName)
 
 			if (isDuplicate) {
 				logger.error(
@@ -156,7 +152,7 @@ export const loadCommands = async (client: Client): Promise<void> => {
 		.filter((result) => result.success)
 		.forEach((result) => {
 			if (result.command && result.commandName) {
-				client.commands.set(result.commandName, result.command)
+				collection.set(result.commandName, result.command)
 				logger.debug(`コマンドを読み込み: ${result.commandName}`)
 			}
 		})
@@ -185,4 +181,5 @@ export const loadCommands = async (client: Client): Promise<void> => {
 			'コマンドが正常に読み込まれませんでした。コマンドファイルの構造とエクスポートを確認してください。'
 		)
 	}
+	return collection
 }

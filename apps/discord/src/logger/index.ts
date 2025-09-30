@@ -1,17 +1,12 @@
 import { WebhookClient } from 'discord.js'
 import winston from 'winston'
-import { env } from '@/schema/env'
 
 /**
  * WebhookClient のインスタンスを作成（URL が存在し有効な場合のみ）
  */
 const createWebhookLogger = (): WebhookClient | null => {
-	if (!env.DISCORD_LOG_WEBHOOK_URL) {
-		return null
-	}
-
 	try {
-		return new WebhookClient({ url: env.DISCORD_LOG_WEBHOOK_URL })
+		return new WebhookClient({ url: Bun.env.DISCORD_LOG_WEBHOOK_URL })
 	} catch (error) {
 		console.error(
 			'WebhookClient の作成に失敗しました:',
@@ -21,7 +16,18 @@ const createWebhookLogger = (): WebhookClient | null => {
 	}
 }
 
-const webhookLogger = createWebhookLogger()
+let webhookLogger: WebhookClient | null = null
+
+/**
+ * WebhookLoggerを初期化する関数
+ */
+const initializeWebhookLogger = (): void => {
+	if (import.meta.env.NODE_ENV === 'development') {
+		logger.warn('開発環境のため、Webhook ロガーは無効化されています')
+		return
+	}
+	webhookLogger = createWebhookLogger()
+}
 
 /**
  * サポートされるカラー名
@@ -220,3 +226,6 @@ for (const level of Object.keys(LOG_LEVELS) as LogLevel[]) {
 		}
 	}
 }
+
+// loggerの定義後にWebhookLoggerを初期化
+initializeWebhookLogger()

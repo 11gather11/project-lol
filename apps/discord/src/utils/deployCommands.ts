@@ -1,4 +1,5 @@
-import { type Client, REST, Routes } from 'discord.js'
+import { REST, Routes } from 'discord.js'
+import { loadCommands } from '@/loaders/commands'
 import { logger } from '@/logger'
 
 /**
@@ -39,17 +40,11 @@ const getDeploymentConfig = (): DeploymentConfig => {
  *
  * @param client - コマンドを含むDiscord.js Clientインスタンス
  */
-export const deployCommands = async (client: Client): Promise<void> => {
-	// クライアントcommands collectionの存在確認
-	if (!client.commands) {
-		logger.error('client.commands Collectionが初期化されていません')
-		return
-	}
+const deployCommands = async (): Promise<void> => {
+	const collection = await loadCommands()
 
 	// コマンドデータの抽出
-	const commands = Array.from(client.commands.values()).map(
-		(cmd) => cmd.command
-	)
+	const commands = collection.map((cmd) => cmd.command.toJSON())
 
 	if (commands.length === 0) {
 		logger.warn('デプロイするコマンドがありません')
@@ -66,7 +61,7 @@ export const deployCommands = async (client: Client): Promise<void> => {
 	// REST APIクライアントの初期化とデプロイ
 	try {
 		const rest = new REST({ version: '10' }).setToken(Bun.env.DISCORD_TOKEN)
-		await rest.put(config.route, { body: commands })
+		await rest.put(config.route, {})
 
 		logger.success(
 			`${commands.length}個のコマンドを${config.scope}スコープにデプロイしました`
@@ -77,3 +72,5 @@ export const deployCommands = async (client: Client): Promise<void> => {
 		throw error
 	}
 }
+
+await deployCommands()
