@@ -1,6 +1,6 @@
 import { REST, Routes } from 'discord.js'
+import { logger } from '@/lib/logger'
 import { loadCommands } from '@/loaders/commands'
-import { logger } from '@/logger'
 
 /**
  * コマンドデプロイメントの設定インターface
@@ -17,9 +17,9 @@ interface DeploymentConfig {
  * @returns デプロイメント設定オブジェクト
  */
 const getDeploymentConfig = (): DeploymentConfig => {
-	const isProduction = import.meta.env.NODE_ENV === 'production'
+	const isDev = import.meta.env.NODE_ENV === 'development'
 
-	if (isProduction) {
+	if (!isDev) {
 		return {
 			scope: 'global',
 			route: Routes.applicationCommands(Bun.env.DISCORD_CLIENT_ID),

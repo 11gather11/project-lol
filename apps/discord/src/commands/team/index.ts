@@ -5,7 +5,7 @@ import {
 	SlashCommandBuilder,
 } from 'discord.js'
 import { colors, emoji } from '@/config'
-import { logger } from '@/logger'
+import { logger } from '@/lib/logger'
 import type { Command } from '@/types/command'
 import { apiClient } from '@/utils/apiClient'
 

@@ -210,6 +210,7 @@ const WEBHOOK_LEVELS: readonly LogLevel[] = [
 	'error',
 	'warn',
 	'success',
+	'info',
 ] as const
 
 /**

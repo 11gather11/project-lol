@@ -1,6 +1,6 @@
 import { Glob } from 'bun'
 import { Collection } from 'discord.js'
-import { logger } from '@/logger'
+import { logger } from '@/lib/logger'
 import type { Command } from '@/types/command'
 
 /**

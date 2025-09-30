@@ -8,17 +8,15 @@
 	},
 	"scripts": {
 		"biome:check": "biome check --write",
-		"dev": "NODE_ENV=development bun --hot src/index.ts",
-		"start": "bun src/index.ts",
-		"dev:command": "NODE_ENV=development bun src/utils/deployCommands.ts",
-		"start:command": "bun src/utils/deployCommands.ts",
+		"dev": "bun --hot src/index.ts",
+		"command": "bun src/utils/deployCommands.ts",
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@project-lol/server": "workspace:*",
 		"discord.js": "14.22.1",
 		"hono": "catalog:hono",
-		"winston": "3.17.0",
+		"winston": "3.18.0",
 		"zod": "catalog:"
 	},
 	"devDependencies": {

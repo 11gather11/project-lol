@@ -1,6 +1,6 @@
 import { Glob } from 'bun'
 import { type Client, Events } from 'discord.js'
-import { logger } from '@/logger'
+import { logger } from '@/lib/logger'
 import type { Event } from '@/types/event'
 
 /**

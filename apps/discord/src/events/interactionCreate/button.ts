@@ -1,5 +1,5 @@
 import type { ButtonInteraction, CacheType } from 'discord.js'
-import { logger } from '@/logger'
+import { logger } from '@/lib/logger'
 
 export const handleButton = (interaction: ButtonInteraction<CacheType>) => {
 	const command = interaction.client.commands.get(interaction.customId)

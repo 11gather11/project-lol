@@ -1,5 +1,5 @@
 import type { CacheType, ModalSubmitInteraction } from 'discord.js'
-import { logger } from '@/logger'
+import { logger } from '@/lib/logger'
 
 export const handleModalSubmit = (
 	interaction: ModalSubmitInteraction<CacheType>
