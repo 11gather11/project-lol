@@ -61,7 +61,7 @@ const deployCommands = async (): Promise<void> => {
 	// REST APIクライアントの初期化とデプロイ
 	try {
 		const rest = new REST({ version: '10' }).setToken(Bun.env.DISCORD_TOKEN)
-		await rest.put(config.route, {})
+		await rest.put(config.route, { body: commands })
 
 		logger.success(
 			`${commands.length}個のコマンドを${config.scope}スコープにデプロイしました`
