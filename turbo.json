@@ -7,7 +7,8 @@
 			"persistent": true
 		},
 		"typecheck": {
-			"dependsOn": ["^typecheck"]
+			"dependsOn": ["^typecheck"],
+			"outputs": ["dist/**"]
 		},
 		"biome:check": {
 			"dependsOn": ["^biome:check"]
