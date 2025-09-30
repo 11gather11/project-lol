@@ -25,13 +25,16 @@
 		"source.organizeImports.biome": "explicit"
 	},
 	"files.watcherExclude": {
-		"**/routeTree.gen.ts": true
+		"**/routeTree.gen.ts": true,
+		"**/worker-configuration.d.ts": true
 	},
 	"search.exclude": {
-		"**/routeTree.gen.ts": true
+		"**/routeTree.gen.ts": true,
+		"**/worker-configuration.d.ts": true
 	},
 	"files.readonlyInclude": {
-		"**/routeTree.gen.ts": true
+		"**/routeTree.gen.ts": true,
+		"**/worker-configuration.d.ts": true
 	},
 	"cSpell.words": ["cooldown", "cooldowns", "puuid", "tanstack", "Unranked"]
 }
