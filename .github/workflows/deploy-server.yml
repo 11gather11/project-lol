@@ -1,0 +1,29 @@
+name: Deploy API Server
+
+on:
+  push:
+    tags:
+      - 'server-v*.*.*'
+
+jobs:
+  deploy-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: apps/server
+          secrets: |
+            API_KEY
+            CORS_ORIGIN
+            RIOT_CLIENT_ID
+            RIOT_REDIRECT_URI
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+          CORS_ORIGIN: ${{ secrets.CORS_ORIGIN }}
+          RIOT_CLIENT_ID: ${{ secrets.RIOT_CLIENT_ID }}
+          RIOT_REDIRECT_URI: ${{ secrets.RIOT_REDIRECT_URI }}
