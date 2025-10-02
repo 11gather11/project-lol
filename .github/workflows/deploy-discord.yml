@@ -13,13 +13,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
-
       - name: Create environment file
         run: |
           cat > apps/discord/.env << EOF
@@ -32,17 +25,24 @@ jobs:
           EOF
 
       - name: Deploy to VPS
-        run: |
-          # monorepo全体を転送（turbo prune用）
-          rsync -avz --delete \
-            --exclude 'node_modules' \
-            --exclude '.git' \
-            --exclude '.turbo' \
-            ./ ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USERNAME }}/discord-bot/
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_PRIVATE_KEY }}
+          source: ".,!node_modules,!.git,!.turbo"
+          target: "/home/${{ secrets.VPS_USERNAME }}/discord-bot"
+          strip_components: 0
+          overwrite: true
+          rm: true
 
       - name: Deploy application
-        run: |
-          ssh ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} '
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_PRIVATE_KEY }}
+          script: |
             set -e
             cd /home/${{ secrets.VPS_USERNAME }}/discord-bot
 
@@ -70,4 +70,3 @@ jobs:
 
             echo "Deployment completed successfully!"
             docker compose -f apps/discord/docker-compose.yml logs --tail=20
-          '
