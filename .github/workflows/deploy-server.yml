@@ -26,7 +26,6 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: apps/server
-          packageManager: bun
           secrets: |
             API_KEY
             CORS_ORIGIN
