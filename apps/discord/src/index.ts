@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits } from 'discord.js'
 import { loadCommands } from '@/loaders/commands'
-import { loadEvents } from '@/loaders/events.ts'
+import { loadEvents } from '@/loaders/events'
 
 // 新しいClientインスタンスを作成
 const client = new Client({

@@ -13,7 +13,7 @@
 		"dev": "wrangler dev",
 		"generate": "drizzle-kit generate",
 		"local:migration": "wrangler d1 migrations apply project-lol --local",
-		"typecheck": "tsc --build"
+		"typecheck": "tsc -noEmit && tsc --build"
 	},
 	"dependencies": {
 		"@hono/swagger-ui": "0.5.2",

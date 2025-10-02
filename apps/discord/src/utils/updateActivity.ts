@@ -1,6 +1,6 @@
 import { ActivityType, type Client } from 'discord.js'
-import version from '@/../package.json'
 import { logger } from '@/lib/logger'
+import version from '../../package.json'
 
 /**
  * ボットのアクティビティを現在参加中のサーバー数に基づいて更新します
