@@ -16,7 +16,7 @@
 		"@project-lol/server": "workspace:*",
 		"discord.js": "14.22.1",
 		"hono": "catalog:hono",
-		"winston": "3.18.1",
+		"winston": "3.18.3",
 		"zod": "catalog:"
 	},
 	"devDependencies": {

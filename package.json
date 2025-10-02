@@ -8,8 +8,8 @@
 		],
 		"catalog": {
 			"@biomejs/biome": "2.2.4",
-			"typescript": "5.9.2",
-			"wrangler": "4.40.2",
+			"typescript": "5.9.3",
+			"wrangler": "4.40.3",
 			"zod": "4.1.11"
 		},
 		"catalogs": {
@@ -26,7 +26,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
-		"lefthook": "1.13.5",
+		"lefthook": "1.13.6",
 		"turbo": "2.5.8",
 		"typescript": "catalog:"
 	},

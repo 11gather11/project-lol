@@ -25,6 +25,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: apps/server
+          command: deploy
           secrets: |
             API_KEY
             CORS_ORIGIN
