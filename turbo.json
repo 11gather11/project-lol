@@ -6,6 +6,10 @@
 			"cache": false,
 			"persistent": true
 		},
+		"build": {
+			"dependsOn": ["^build"],
+			"outputs": ["dist/**", ".next/**", ".output/**"]
+		},
 		"typecheck": {
 			"dependsOn": ["^typecheck"],
 			"outputs": ["dist/**"]
