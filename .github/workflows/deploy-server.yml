@@ -1,7 +1,6 @@
 name: Deploy API Server
 
 on:
-  workflow_dispatch: 
   push:
     tags:
       - 'server-v*.*.*'
