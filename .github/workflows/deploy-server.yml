@@ -20,6 +20,17 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Generate Drizzle kit
+        working-directory: apps/server
+        run: bun run generate
+
+      - name: D1 migrations
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: apps/server
+          command: d1 migrations apply project-lol --remote
+
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
@@ -36,14 +47,3 @@ jobs:
           CORS_ORIGIN: ${{ secrets.CORS_ORIGIN }}
           RIOT_CLIENT_ID: ${{ secrets.RIOT_CLIENT_ID }}
           RIOT_REDIRECT_URI: ${{ secrets.RIOT_REDIRECT_URI }}
-
-      - name: Generate Drizzle kit
-        working-directory: apps/server
-        run: bun run generate
-
-      - name: D1 migrations
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          workingDirectory: apps/server
-          command: d1 migrations apply project-lol --remote
