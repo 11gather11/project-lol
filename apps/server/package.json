@@ -13,7 +13,6 @@
 		"dev": "wrangler dev",
 		"generate": "drizzle-kit generate",
 		"local:migration": "wrangler d1 migrations apply project-lol --local",
-		"remote:migration": "wrangler d1 migrations apply project-lol --remote",
 		"typecheck": "tsc --build"
 	},
 	"dependencies": {
