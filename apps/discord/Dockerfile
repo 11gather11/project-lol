@@ -1,43 +1,38 @@
-FROM oven/bun:1.1.8-alpine AS base
+FROM oven/bun:latest AS base
+WORKDIR /project-lol-discord
 
-# Dependencies stage
-FROM base AS deps
-WORKDIR /app
-COPY package.json bun.lockb ./
-RUN bun install --frozen-lockfile --production
+# Install turbo globally
+RUN bun add -g turbo
 
-# Build stage
-FROM base AS build
-WORKDIR /app
-COPY package.json bun.lockb ./
-COPY tsconfig.json ./
-COPY src ./src
-RUN bun install --frozen-lockfile
-RUN bun run typecheck
+FROM base AS pruner
+WORKDIR /project-lol-discord
 
-# Production stage
-FROM base AS production
-WORKDIR /app
+# Copy entire monorepo
+COPY . .
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs && adduser -S bunuser -u 1001
+# Prune to only discord workspace
+RUN turbo prune @project-lol/discord --docker
 
-# Copy dependencies
-COPY --from=deps --chown=bunuser:nodejs /app/node_modules ./node_modules
-COPY --chown=bunuser:nodejs package.json ./
+# Install all dependencies to root node_modules
+RUN bun install --production
 
-# Copy source code
-COPY --chown=bunuser:nodejs src ./src
+FROM oven/bun:latest AS installer
+WORKDIR /project-lol-discord
 
-# Switch to non-root user
-USER bunuser
+# Copy pruned workspace
+COPY --from=pruner /project-lol-discord/out/json/ .
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD bun --version || exit 1
+# Install dependencies (regenerate lockfile for catalog: dependencies)
+RUN bun install
 
-# Expose port (if needed for metrics/health endpoint)
-EXPOSE 3000
+# Copy source files
+COPY --from=pruner /project-lol-discord/out/full/ .
 
-# Start the application
+FROM oven/bun:alpine AS runtime
+WORKDIR /project-lol-discord
+
+# Copy installed dependencies and source
+COPY --from=installer /project-lol-discord .
+
+WORKDIR /project-lol-discord/apps/discord
 CMD ["bun", "src/index.ts"]

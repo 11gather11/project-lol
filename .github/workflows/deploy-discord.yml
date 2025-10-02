@@ -1,0 +1,73 @@
+name: Deploy Discord Bot
+
+on:
+  push:
+    tags:
+      - 'discord-v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  deploy-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create environment file
+        run: |
+          cat > apps/discord/.env << EOF
+          DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}
+          DISCORD_CLIENT_ID=${{ secrets.DISCORD_CLIENT_ID }}
+          DISCORD_LOG_WEBHOOK_URL=${{ secrets.DISCORD_LOG_WEBHOOK_URL }}
+          API_BASE_URL=${{ secrets.API_BASE_URL }}
+          API_KEY=${{ secrets.API_KEY }}
+          NODE_ENV=production
+          EOF
+
+      - name: Deploy to VPS
+        run: |
+          # monorepo全体を転送（turbo prune用）
+          rsync -avz --delete \
+            --exclude 'node_modules' \
+            --exclude '.git' \
+            --exclude '.turbo' \
+            ./ ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USERNAME }}/discord-bot/
+
+      - name: Deploy application
+        run: |
+          ssh ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} '
+            set -e
+            cd /home/${{ secrets.VPS_USERNAME }}/discord-bot
+
+            # 既存のコンテナを停止・削除
+            echo "Stopping existing containers..."
+            docker compose -f apps/discord/docker-compose.yml down || true
+            docker system prune -f
+
+            # 新しいコンテナをビルド・起動
+            echo "Building and starting new containers..."
+            docker compose -f apps/discord/docker-compose.yml up -d --build
+
+            # ヘルスチェック
+            echo "Checking container health..."
+            sleep 15
+            if ! docker compose -f apps/discord/docker-compose.yml ps | grep -q "Up"; then
+              echo "Container failed to start properly"
+              docker compose -f apps/discord/docker-compose.yml logs
+              exit 1
+            fi
+
+            # Discord コマンドをデプロイ（コンテナ内で実行）
+            echo "Deploying Discord commands..."
+            docker compose -f apps/discord/docker-compose.yml exec -T discord-bot bun src/utils/deployCommands.ts
+
+            echo "Deployment completed successfully!"
+            docker compose -f apps/discord/docker-compose.yml logs --tail=20
+          '

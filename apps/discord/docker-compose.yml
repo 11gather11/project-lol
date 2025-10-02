@@ -3,11 +3,11 @@ version: '3.8'
 services:
   discord-bot:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../..              # monorepo root
+      dockerfile: apps/discord/Dockerfile
     container_name: project-lol-discord-bot
     env_file:
-      - .env.production
+      - .env
     restart: unless-stopped
     networks:
       - discord-bot-network
@@ -22,9 +22,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-    # Uncomment if you need to expose ports for health checks or metrics
-    # ports:
-    #   - "3000:3000"
 
 networks:
   discord-bot-network:
