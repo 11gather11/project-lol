@@ -142,7 +142,7 @@ const sendWebhook = async (args: unknown[], level: LogLevel): Promise<void> => {
 
 		// エラーレベルの場合は @everyone を付加
 		const webhookMessage = {
-			username: 'Logs',
+			username: 'Bot Log',
 			content: level === 'error' ? `@everyone ${content}` : content,
 		}
 
