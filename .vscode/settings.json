@@ -36,5 +36,5 @@
 		"**/routeTree.gen.ts": true,
 		"**/worker-configuration.d.ts": true
 	},
-	"cSpell.words": ["cooldown", "cooldowns", "puuid", "tanstack", "Unranked"]
+	"cSpell.words": ["puuid", "tanstack", "Unranked"]
 }

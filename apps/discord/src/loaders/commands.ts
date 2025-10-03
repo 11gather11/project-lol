@@ -47,19 +47,6 @@ const isValidCommand = (cmd: unknown): cmd is Command => {
 		return false
 	if (command.modal && typeof command.modal !== 'function') return false
 	if (command.button && typeof command.button !== 'function') return false
-	if (command.cooldown && typeof command.cooldown !== 'number') return false
-
-	// クールダウン範囲の検証（合理的な制限）
-	if (
-		command.cooldown &&
-		typeof command.cooldown === 'number' &&
-		(command.cooldown < 0 || command.cooldown > 86400)
-	) {
-		logger.warn(
-			`コマンド "${commandData.name}" のクールダウンは0-86400秒の範囲で設定してください`
-		)
-		return false
-	}
 
 	return true
 }
