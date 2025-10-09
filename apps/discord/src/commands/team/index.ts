@@ -39,7 +39,7 @@ interface TeamCombination {
 const DIVISION_BONUS_POINTS = 5
 
 // 戦力差のしきい値（この値以下の組み合わせのみを候補とする）
-const MAX_POWER_DIFFERENCE = 50
+const MAX_POWER_DIFFERENCE = 30
 
 const ERROR_MESSAGES = {
 	SERVER_ONLY: 'このコマンドはサーバー内でのみ使用できます。',
@@ -123,6 +123,43 @@ const fetchRankData = async (
 	} catch (error) {
 		logger.error('API呼び出しエラー:', error)
 		return { success: false, error: ERROR_MESSAGES.API_ERROR }
+	}
+}
+
+const parseExcludedUserIds = (input?: string | null): string[] => {
+	if (!input) {
+		return []
+	}
+
+	const ids = new Set<string>()
+
+	for (const [, userId] of input.matchAll(/<@!?(\d+)>/g)) {
+		if (userId) {
+			ids.add(userId)
+		}
+	}
+
+	input
+		.split(/[\s,]+/)
+		.map((token) => token.trim())
+		.filter(Boolean)
+		.forEach((token) => {
+			if (/^\d+$/.test(token)) {
+				ids.add(token)
+			}
+		})
+
+	return Array.from(ids)
+}
+
+const formatTeamMemberField = (teamMember: TeamMember) => {
+	const divisionText = teamMember.division ? ` ${teamMember.division}` : ''
+	const rankText = `${teamMember.rank}ポイント`
+
+	return {
+		name: '',
+		value: `${getRankEmoji(teamMember.tier)}${divisionText} <@${teamMember.member.id}> ・ ${rankText}`,
+		inline: true,
 	}
 }
 
@@ -219,30 +256,21 @@ function generateAllTeamCombinations(
 function createTeamEmbeds(
 	blueTeam: Team,
 	redTeam: Team,
-	combinationInfo?: { current: number; total: number }
+	options?: {
+		combinationInfo?: { current: number; total: number }
+		excludedMembers?: GuildMember[]
+	}
 ): EmbedBuilder[] {
 	// ブルーチームのEmbed作成
 	const blueTeamEmbed = new EmbedBuilder()
 		.setTitle('Blue Team')
-		.addFields(
-			blueTeam.members.map((member) => ({
-				name: '',
-				value: `${getRankEmoji(member.tier)}${member.division} <@${member.member.id}>`,
-				inline: true,
-			}))
-		)
+		.addFields(blueTeam.members.map((member) => formatTeamMemberField(member)))
 		.setColor(colors.blue)
 
 	// レッドチームのEmbed作成
 	const redTeamEmbed = new EmbedBuilder()
 		.setTitle('Red Team')
-		.addFields(
-			redTeam.members.map((member) => ({
-				name: '',
-				value: `${getRankEmoji(member.tier)}${member.division} <@${member.member.id}>`,
-				inline: true,
-			}))
-		)
+		.addFields(redTeam.members.map((member) => formatTeamMemberField(member)))
 		.setColor(colors.red)
 
 	// チーム間の戦力差を計算
@@ -251,9 +279,11 @@ function createTeamEmbeds(
 	)
 
 	// チーム情報のEmbed作成
+	const combinationInfo = options?.combinationInfo
 	const combinationSummary = combinationInfo
 		? `${combinationInfo.current}/${combinationInfo.total}`
 		: 'N/A'
+	const excludedMembers = options?.excludedMembers ?? []
 	const teamInfoEmbed = new EmbedBuilder().setTitle('Team Info').addFields(
 		{ name: 'Blue Team', value: `${blueTeam.members.length}人`, inline: true },
 		{ name: 'Red Team', value: `${redTeam.members.length}人`, inline: true },
@@ -266,8 +296,25 @@ function createTeamEmbeds(
 			name: 'チーム戦力差',
 			value: `${powerDifference}ポイント`,
 			inline: true,
+		},
+		{
+			name: 'Blue戦力合計',
+			value: `${blueTeam.totalRankPoints}ポイント`,
+			inline: true,
+		},
+		{
+			name: 'Red戦力合計',
+			value: `${redTeam.totalRankPoints}ポイント`,
+			inline: true,
 		}
 	)
+	teamInfoEmbed.addFields({
+		name: '除外メンバー',
+		value: excludedMembers.length
+			? excludedMembers.map((member) => `<@${member.id}>`).join('\n')
+			: 'なし',
+		inline: false,
+	})
 
 	return [blueTeamEmbed, redTeamEmbed, teamInfoEmbed]
 }
@@ -275,7 +322,15 @@ function createTeamEmbeds(
 export default {
 	command: new SlashCommandBuilder()
 		.setName('team')
-		.setDescription('ランクによる実力差を考慮したチーム分けを行います'),
+		.setDescription('ランクによる実力差を考慮したチーム分けを行います')
+		.addStringOption((option) =>
+			option
+				.setName('exclude')
+				.setDescription(
+					'チーム分けから除外するユーザーを @メンションまたはIDでスペース区切り指定'
+				)
+				.setRequired(false)
+		),
 
 	execute: async (interaction) => {
 		await interaction.deferReply()
@@ -301,12 +356,30 @@ export default {
 
 		// ボイスチャンネルメンバーを取得（ボット除外）
 		const channelMembers = Array.from(
-			voiceChannel.members.filter((member) => !member.user.bot).values()
+			voiceChannel.members
+				.filter((voiceMember) => !voiceMember.user.bot)
+				.values()
 		)
+
+		const excludeOption = interaction.options.getString('exclude')
+		const excludedUserIds = new Set(parseExcludedUserIds(excludeOption))
+		const excludedMembers = channelMembers.filter((voiceMember) =>
+			excludedUserIds.has(voiceMember.id)
+		)
+		const filteredMembers = channelMembers.filter(
+			(voiceMember) => !excludedUserIds.has(voiceMember.id)
+		)
+
+		if (filteredMembers.length < 2) {
+			await interaction.editReply({
+				content: ERROR_MESSAGES.INSUFFICIENT_MEMBERS,
+			})
+			return
+		}
 
 		// ランクデータを取得
 		const rankDataResult = await fetchRankData(
-			channelMembers.map((member) => member.id)
+			filteredMembers.map((voiceMember) => voiceMember.id)
 		)
 		if (!rankDataResult.success) {
 			await interaction.editReply({
@@ -324,7 +397,7 @@ export default {
 		}
 
 		const allTeamCombinations = generateAllTeamCombinations(
-			channelMembers,
+			filteredMembers,
 			rankDataResult.ranks
 		)
 
@@ -363,7 +436,10 @@ export default {
 		const responseEmbeds = createTeamEmbeds(
 			chosenCombination.blueTeam,
 			chosenCombination.redTeam,
-			combinationSummary
+			{
+				combinationInfo: combinationSummary,
+				excludedMembers,
+			}
 		)
 
 		await interaction.editReply({ embeds: responseEmbeds })
