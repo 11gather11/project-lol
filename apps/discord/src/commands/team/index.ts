@@ -36,7 +36,7 @@ interface TeamCombination {
 }
 
 // ディビジョンボーナスポイント
-const DIVISION_BONUS_POINTS = 2.5
+const DIVISION_BONUS_POINTS = 5
 
 // 戦力差のしきい値（この値以下の組み合わせのみを候補とする）
 const MAX_POWER_DIFFERENCE = 50
@@ -56,17 +56,17 @@ const ERROR_MESSAGES = {
 const calculateRankValue = (tier: string, division: string): number => {
 	// 各ティアのベース値（実際のスキル差を反映）
 	const tierValues: Record<string, number> = {
-		UNRANKED: 0,
+		UNRANKED: 5,
 		IRON: 10,
-		BRONZE: 25,
-		SILVER: 40,
-		GOLD: 55,
-		PLATINUM: 70,
-		EMERALD: 85, // プラチナとダイヤモンドの間
-		DIAMOND: 100,
-		MASTER: 115, // ディビジョンなし
-		GRANDMASTER: 130, // ディビジョンなし
-		CHALLENGER: 150, // ディビジョンなし
+		BRONZE: 30,
+		SILVER: 50,
+		GOLD: 70,
+		PLATINUM: 90,
+		EMERALD: 110, // プラチナとダイヤモンドの間
+		DIAMOND: 130,
+		MASTER: 150, // ディビジョンなし
+		GRANDMASTER: 170, // ディビジョンなし
+		CHALLENGER: 190, // ディビジョンなし
 	}
 
 	const baseValue = tierValues[tier] || 0
@@ -124,39 +124,6 @@ const fetchRankData = async (
 		logger.error('API呼び出しエラー:', error)
 		return { success: false, error: ERROR_MESSAGES.API_ERROR }
 	}
-}
-
-// 決定論的シード付きランダム関数
-const seededRandom = (seed: number): number => {
-	const x = Math.sin(seed) * 10000
-	return x - Math.floor(x)
-}
-
-// メンバーデータと現在時刻から非決定論的なシードを生成
-const generateSeed = (members: GuildMember[], rankData: RankInfo[]): number => {
-	const memberIds = members
-		.map((member) => member.id)
-		.sort()
-		.join('')
-	const rankString = rankData
-		.map(
-			(rankInfo) =>
-				`${rankInfo.discordId}:${rankInfo.tier}:${rankInfo.division}`
-		)
-		.sort()
-		.join('')
-
-	// 現在時刻を追加して毎回異なる結果を生成
-	const timestamp = Date.now().toString()
-
-	let hash = 0
-	const combinedString = memberIds + rankString + timestamp
-	for (let i = 0; i < combinedString.length; i++) {
-		const char = combinedString.charCodeAt(i)
-		hash = (hash << 5) - hash + char
-		hash = hash & hash // 32bit整数に変換
-	}
-	return Math.abs(hash)
 }
 
 function generateAllTeamCombinations(
@@ -238,23 +205,12 @@ function generateAllTeamCombinations(
 			blueTeam.totalRankPoints - redTeam.totalRankPoints
 		)
 
-		// しきい値以下の戦力差の組み合わせのみを追加
-		if (powerDifference <= MAX_POWER_DIFFERENCE) {
-			possibleCombinations.push({
-				blueTeam,
-				redTeam,
-				powerDifference,
-				combinationId: index + 1,
-			})
-		}
-	})
-
-	// 戦力差の小さい順にソート（最もバランスの良いものが最初）
-	possibleCombinations.sort((a, b) => a.powerDifference - b.powerDifference)
-
-	// ソート後に組み合わせIDを再割り当て
-	possibleCombinations.forEach((combination, index) => {
-		combination.combinationId = index + 1
+		possibleCombinations.push({
+			blueTeam,
+			redTeam,
+			powerDifference,
+			combinationId: index + 1,
+		})
 	})
 
 	return possibleCombinations
@@ -295,12 +251,15 @@ function createTeamEmbeds(
 	)
 
 	// チーム情報のEmbed作成
+	const combinationSummary = combinationInfo
+		? `${combinationInfo.current}/${combinationInfo.total}`
+		: 'N/A'
 	const teamInfoEmbed = new EmbedBuilder().setTitle('Team Info').addFields(
 		{ name: 'Blue Team', value: `${blueTeam.members.length}人`, inline: true },
 		{ name: 'Red Team', value: `${redTeam.members.length}人`, inline: true },
 		{
 			name: '組み合わせ候補',
-			value: `${combinationInfo?.current}/${combinationInfo?.total}`,
+			value: combinationSummary,
 			inline: true,
 		},
 		{
@@ -364,24 +323,34 @@ export default {
 			return
 		}
 
-		const teamCombinations = generateAllTeamCombinations(
+		const allTeamCombinations = generateAllTeamCombinations(
 			channelMembers,
 			rankDataResult.ranks
 		)
 
-		if (teamCombinations.length === 0) {
-			await interaction.editReply({
-				content: ERROR_MESSAGES.NO_COMBINATIONS,
-			})
-			return
-		}
-
-		// メンバーデータに基づく決定論的ランダム選択
-		const randomSeed = generateSeed(channelMembers, rankDataResult.ranks)
-		const selectedIndex = Math.floor(
-			seededRandom(randomSeed) * teamCombinations.length
+		const eligibleCombinations = allTeamCombinations.filter(
+			(combination) => combination.powerDifference <= MAX_POWER_DIFFERENCE
 		)
-		const chosenCombination = teamCombinations[selectedIndex]
+
+		let chosenCombination: TeamCombination | undefined
+		let combinationSummary: { current: number; total: number }
+
+		if (eligibleCombinations.length > 0) {
+			const selectedIndex = Math.floor(
+				Math.random() * eligibleCombinations.length
+			)
+			chosenCombination = eligibleCombinations[selectedIndex]
+			combinationSummary = {
+				current: selectedIndex + 1,
+				total: eligibleCombinations.length,
+			}
+		} else {
+			const sortedByPowerDifference = [...allTeamCombinations].sort(
+				(a, b) => a.powerDifference - b.powerDifference
+			)
+			chosenCombination = sortedByPowerDifference[0]
+			combinationSummary = { current: 1, total: allTeamCombinations.length }
+		}
 
 		if (!chosenCombination) {
 			await interaction.editReply({
@@ -394,10 +363,7 @@ export default {
 		const responseEmbeds = createTeamEmbeds(
 			chosenCombination.blueTeam,
 			chosenCombination.redTeam,
-			{
-				current: chosenCombination.combinationId,
-				total: teamCombinations.length,
-			}
+			combinationSummary
 		)
 
 		await interaction.editReply({ embeds: responseEmbeds })

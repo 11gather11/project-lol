@@ -18,7 +18,7 @@
 	"dependencies": {
 		"@hono/swagger-ui": "0.5.2",
 		"@hono/zod-validator": "0.7.3",
-		"drizzle-orm": "0.44.5",
+		"drizzle-orm": "0.44.6",
 		"drizzle-zod": "0.8.3",
 		"hono": "catalog:hono",
 		"zod": "catalog:"

@@ -7,14 +7,14 @@
 			"packages/*"
 		],
 		"catalog": {
-			"@biomejs/biome": "2.2.4",
+			"@biomejs/biome": "2.2.5",
 			"typescript": "5.9.3",
-			"wrangler": "4.40.3",
-			"zod": "4.1.11"
+			"wrangler": "4.42.1",
+			"zod": "4.1.12"
 		},
 		"catalogs": {
 			"hono": {
-				"hono": "4.9.9"
+				"hono": "4.9.10"
 			}
 		}
 	},
