@@ -1,7 +1,6 @@
 import { Events } from 'discord.js'
 import { logger } from '@/lib/logger'
 import type { Event } from '@/types/event'
-import { updateActivity } from '@/utils/updateActivity'
 
 export default {
 	name: Events.ClientReady,
@@ -9,8 +8,5 @@ export default {
 
 	execute: async (client) => {
 		logger.info(`${client.user.tag} でログインしました！`)
-
-		// アクティビティを更新
-		updateActivity(client)
 	},
 } satisfies Event<Events.ClientReady>
