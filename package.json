@@ -26,6 +26,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
+		"@socketsecurity/bun-security-scanner": "^1.1.0",
 		"lefthook": "1.13.6",
 		"turbo": "2.5.8",
 		"typescript": "catalog:"
