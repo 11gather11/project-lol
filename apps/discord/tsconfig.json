@@ -21,10 +21,6 @@
 		"noUncheckedIndexedAccess": true,
 		"noImplicitOverride": true,
 
-		"types": [
-			"bun-types" // add Bun global
-		],
-
 		"paths": {
 			"@/*": ["./src/*"]
 		}
