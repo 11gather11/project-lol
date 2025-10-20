@@ -39,7 +39,7 @@ interface TeamCombination {
 const DIVISION_BONUS_POINTS = 5
 
 // 戦力差のしきい値（この値以下の組み合わせのみを候補とする）
-const MAX_POWER_DIFFERENCE = 30
+const MAX_POWER_DIFFERENCE = 10
 
 const ERROR_MESSAGES = {
 	SERVER_ONLY: 'このコマンドはサーバー内でのみ使用できます。',
@@ -159,7 +159,7 @@ const formatTeamMemberField = (teamMember: TeamMember) => {
 	return {
 		name: '',
 		value: `${getRankEmoji(teamMember.tier)}${divisionText} <@${teamMember.member.id}> ・ ${rankText}`,
-		inline: true,
+		inline: false,
 	}
 }
 
